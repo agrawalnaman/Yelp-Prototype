@@ -57,7 +57,7 @@ app.use(function (req, res, next) {
 const { mongoDB } = require('./config');
 const mongoose = require('mongoose');
 const Customers = require('./Models/Customer');
-
+const Restaurants = require('./Models/Restaurant');
 var options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -128,34 +128,33 @@ app.post("/restaurantLogin", function (req, res) {
   console.log("Inside Restaurant Login Post Request");
   console.log("Req Body : ", req.body);
   var email = req.body.email;
-  var sql = "SELECT * FROM Restaurants WHERE Email = ?";
-  con.query(sql, [email], async function (err, result) {
+  Restaurants.findOne({ Email: req.body.email}, async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
+      console.log('Mongo Error:', err);
       res.writeHead(205, {
         "Content-Type": "text/plain",
       });
       res.end("Unsuccessful Login");
     }
-    else {
-
-      if (result[0] != null) {
-        const isSame = await bcrypt.compare(req.body.password, result[0].Password);
-        if (isSame) {
-
-          res.cookie("cookie", "restaurant-admin", {
+      console.log(result);
+      if (result) {
+        const isSame = await bcrypt.compare(req.body.password, result.Password);
+        console.log(isSame);
+        if (isSame === true) {
+          console.log("login successfull!");
+          res.cookie("cookie", "resturant-admin", {
             maxAge: 3600000,
             httpOnly: false,
             path: "/",
           });
           resjson = {
-            idRestaurants: result[0].idRestaurants,
+            idRestaurants: result._id.toString(), 
+            password: result.Password,
           };
-          console.log("login successfull!");
           res.status(200).send(resjson);
         }
         else {
-          console.log('SQL Error:', err);
+          console.log('Error:', err);
           res.writeHead(205, {
             "Content-Type": "text/plain",
           });
@@ -163,14 +162,14 @@ app.post("/restaurantLogin", function (req, res) {
         }
       }
       else {
-        console.log('SQL Error:', err);
+        console.log('Error2:', err);
         res.writeHead(205, {
           "Content-Type": "text/plain",
         });
         res.end("Unsuccessful Login");
       }
-    }
   });
+
 });
 
 //Route to handle Post Request Call for Customer SignUp
@@ -221,6 +220,7 @@ app.post("/customerSignUp", function (req, res) {
             res.writeHead(200, {
               'Content-Type': 'text/plain'
             })
+            console.log("Customer Profile Created");
             res.end();
           }
         });
@@ -247,40 +247,41 @@ app.post("/restaurantSignUp", async function (req, res) {
     return hash;
   }
   var restaurantPassword = await hashPassword(req.body.password);
-  con.query(sql_findEmail, [email], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
+  var RestaurantProfile = new Restaurants({
+    Name: Name,
+    Location: location,
+    Email: email,
+    Password: restaurantPassword
+  });
+  Restaurants.findOne({ Email: email }, (error, profile) => {
+    if (error) {
       res.writeHead(205, {
         "Content-Type": "text/plain",
       });
-      res.end("SignUp failed SQL ERROR");
+      res.end();
+    }
+    if (profile) {
+      res.writeHead(205, {
+        'Content-Type': 'text/plain'
+      })
+      res.end("Restaurant Email ID already exists");
     }
     else {
-      if (result[0] == null) {
-        con.query(sql_insert, [email, Name, restaurantPassword, location], function (err, result) {
-          if (err) {
-            console.log('SQL Error:', err);
-            res.writeHead(205, {
-              "Content-Type": "text/plain",
-            });
-            res.end("SignUp failed");
-          }
-          else {
-            console.log("Sigunp successfull!");
-            res.writeHead(200, {
-              "Content-Type": "text/plain",
-            });
-            res.end("SignUp Successful");
-          }
-        });
-      }
-      else {
-        console.log('SQL Error:', err);
-        res.writeHead(205, {
-          "Content-Type": "text/plain",
-        });
-        res.end("Email already Exists");
-      }
+      RestaurantProfile.save((error, data) => {
+        if (error) {
+          res.writeHead(500, {
+            'Content-Type': 'text/plain'
+          })
+          res.end();
+        }
+        else {
+          res.writeHead(200, {
+            'Content-Type': 'text/plain'
+          })
+          console.log("Restaurant Profile Created");
+          res.end();
+        }
+      });
     }
   });
 });
@@ -300,21 +301,18 @@ app.post("/restaurantSignUp", async function (req, res) {
 //Route to get restaurant Profile
 app.get("/restaurantProfile", function (req, res) {
   console.log("Inside Restaurant Dashboard");
-  var idRestaurants = req.body.idRestaurants;
+  var idRestaurants = req.query.idRestaurants;
   console.log(req.body, idRestaurants);
-  var sql = "SELECT * FROM Restaurants WHERE idRestaurants = ?";
-  con.query(sql, [idRestaurants], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      // res.writeHead(205, {
-      //   "Content-Type": "text/plain",
-      // });
-      res.status(400).send("Unsuccessful To fetch details");
-      console.log("cannot fetch");
+  Restaurants.findById(idRestaurants, (error, profile) => {
+    if (error) {
+        res.writeHead(400, {
+            'Content-Type': 'text/plain'
+        })
+        res.end();
     }
-    else {
-      console.log("restaurant profile fetched successfully");
-      res.status(200).send(result);
+    if (profile) {
+      res.status(200).send(profile);
+      console.log("get restaurant profile successful!");
     }
   });
 });
@@ -493,8 +491,7 @@ app.post("/updateCustomerPassword", function (req, res) {
 
 //Route to update restaurant password .
 app.post("/updateRestaurantPassword", function (req, res) {
-  console.log("Inside Update customer password section");
-  var sql = "UPDATE Restaurants SET Password= ? WHERE idRestaurants = ? ";
+  console.log("Inside Update restaurant password section");
   async function hashPassword(password) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -503,15 +500,21 @@ app.post("/updateRestaurantPassword", function (req, res) {
   }
   hashPassword(req.body.password).then((newPassword) => {
 
-    con.query(sql, [newPassword, req.body.idRestaurants], function (err, result) {
-      if (err) {
-        console.log('SQL Error:', err);
-        res.status(205).send("Unsuccessful To update Password");
+    Restaurants.findByIdAndUpdate(req.body.idRestaurants,{Password:newPassword}, {useFindAndModify: false}, (error, profile) => {
+      if (error) {
+        res.writeHead(205, {
+          "Content-Type": "text/plain",
+        });
+        res.end();
       }
-      else {
-        console.log("password change successful")
-        res.status(200).send(" Restaurant Password Updated.");
+      if (profile) {
+        res.writeHead(200, {
+          'Content-Type': 'text/plain'
+        })
+        console.log("restaurant password updated");
+        res.end("Restuarant Password Updated");
       }
+  
     });
   });
 
@@ -566,16 +569,33 @@ app.post("/submitOrder", function (req, res) {
 //Route to update Restaurant Profile
 app.post("/updateRestaurantProfile", function (req, res) {
   console.log("Inside Update Restaurant profile section");
-  var sql = "UPDATE Restaurants SET Name= ?,Email= ?,Password=?,Contact=?,Location=?,Description=?,Timings=?,PictureOfRestaurants=?,PicturesOfDishes=? WHERE idRestaurants = ? ";
-  con.query(sql, [req.body.name, req.body.email, req.body.password, req.body.contact, req.body.location, req.body.description, req.body.timings, req.body.pictureofrestaurants, req.body.picturesofdishes, req.body.idRestaurants], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To update details");
-    }
-    else {
-      res.status(200).send("Restaurant UPDATED");
-    }
-  });
+  var updatedValues={
+    Name: req.body.name,
+    Email: req.body.email,
+    Password: req.body.password,
+    Contact: req.body.contact,
+    Location: req.body.location,
+    Description: req.body.description,
+    Timings: req.body.timings,
+    deliveryMode:req.body.deliveryMode
+   } 
+ 
+   Restaurants.findByIdAndUpdate(req.body.idRestaurants,{ $set: updatedValues}, {useFindAndModify: false}, (error, profile) => {
+     if (error) {
+       res.writeHead(205, {
+         "Content-Type": "text/plain",
+       });
+       res.end();
+     }
+     if (profile) {
+       res.writeHead(200, {
+         'Content-Type': 'text/plain'
+       })
+       res.end("Restuarant Profile Updated");
+     }
+ 
+   });
+ 
 
 });
 

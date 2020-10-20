@@ -9,7 +9,6 @@ var restaurantProfile = new Schema({
     Description: {type: String},
     Contact: {type: String},
     Timings: {type: String},
-    Cuisine: {type: String},
     deliveryMode: {type: String},
     PictureOfRestaurants:{type:String}
 },
