@@ -19,14 +19,6 @@ var con = mysql.createConnection({
   database: "Yelp",
 });
 
-// mysql.createPool({
-//   connectionLimit: 100, //important
-//   host: '127.0.0.1',
-//   user: '***',
-//   password: '***',
-//   database: 'user',
-//   debug: false
-// });
 //use cors to allow cross origin resource sharing
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
@@ -62,25 +54,42 @@ app.use(function (req, res, next) {
   next();
 });
 
+const { mongoDB } = require('./config');
+const mongoose = require('mongoose');
+const Customers = require('./Models/Customer');
+
+var options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  poolSize: 500,
+  bufferMaxEntries: 0
+};
+
+mongoose.connect(mongoDB, options, (err, res) => {
+  if (err) {
+    console.log(err);
+    console.log(`MongoDB Connection Failed`);
+  } else {
+    console.log(`MongoDB Connected`);
+  }
+});
 
 //Route to handle Post Request Call for Customer Login
 app.post("/customerLogin", function (req, res) {
   console.log("Inside Login Post Request");
   console.log("Req Body : ", req.body);
   var email = req.body.email;
-  var sql = "SELECT * FROM Customers WHERE Email = ?";
-  con.query(sql, [email], async function (err, result) {
+  Customers.findOne({ Email: req.body.email}, async function (err, result) {
     if (err) {
-      console.log('SQL Error1:', err);
+      console.log('Mongo Error:', err);
       res.writeHead(205, {
         "Content-Type": "text/plain",
       });
       res.end("Unsuccessful Login");
     }
-    else {
       console.log(result);
-      if (result[0] != null) {
-        const isSame = await bcrypt.compare(req.body.password, result[0].Password);
+      if (result) {
+        const isSame = await bcrypt.compare(req.body.password, result.Password);
         console.log(isSame);
         if (isSame === true) {
           console.log("login successfull!");
@@ -89,16 +98,14 @@ app.post("/customerLogin", function (req, res) {
             httpOnly: false,
             path: "/",
           });
-          // localStorage.setItem('persona','customer');
-          // localStorage.setItem('email',email);
           resjson = {
-            idCustomers: result[0].idCustomers,
-            password: result[0].Password,
+            idCustomers: result._id.toString(), 
+            password: result.Password,
           };
           res.status(200).send(resjson);
         }
         else {
-          console.log('SQL Error:', err);
+          console.log('Error:', err);
           res.writeHead(205, {
             "Content-Type": "text/plain",
           });
@@ -106,13 +113,12 @@ app.post("/customerLogin", function (req, res) {
         }
       }
       else {
-        console.log('SQL Error2:', err);
+        console.log('Error2:', err);
         res.writeHead(205, {
           "Content-Type": "text/plain",
         });
         res.end("Unsuccessful Login");
       }
-    }
   });
 });
 
@@ -174,8 +180,6 @@ app.post("/customerSignUp", function (req, res) {
   var email = req.body.email;
   var firstName = req.body.firstName;
   var lastName = req.body.lastName;
-  var sql_findEmail = "SELECT * FROM Customers WHERE Email = ?";
-  var sql_insert = "INSERT INTO Customers (Email,FirstName,LastName,Password) VALUES (?,?,?,?)";
   async function hashPassword(password) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -185,47 +189,44 @@ app.post("/customerSignUp", function (req, res) {
 
   hashPassword(req.body.password).then((customerPassword) => {
     console.log("after Hash:", customerPassword);
+    var CustomerProfile = new Customers({
+      FirstName: firstName,
+      LastName: lastName,
+      Email: email,
+      Password: customerPassword
+    });
 
-    con.query(sql_findEmail, [email], function (err, result) {
-      if (err) {
-        console.log('SQL Error:', err);
+    Customers.findOne({ Email: email }, (error, profile) => {
+      if (error) {
         res.writeHead(205, {
           "Content-Type": "text/plain",
         });
-        res.end("SignUp failed");
+        res.end();
+      }
+      if (profile) {
+        res.writeHead(205, {
+          'Content-Type': 'text/plain'
+        })
+        res.end("Customer Email ID already exists");
       }
       else {
-        if (result[0] == null) {
-          con.query(sql_insert, [email, firstName, lastName, customerPassword], function (err, result) {
-            if (err) {
-              console.log('SQL Error:', err);
-              res.writeHead(205, {
-                "Content-Type": "text/plain",
-              });
-              res.end("SignUp failed");
-            }
-            else {
-              console.log("Sigunp successfull!");
-              res.writeHead(200, {
-                "Content-Type": "text/plain",
-              });
-              res.end("SignUP Login");
-            }
-          });
-        }
-        else {
-          console.log('SQL Error:', err);
-          res.writeHead(205, {
-            "Content-Type": "text/plain",
-          });
-          res.end("Email already Exists");
-        }
+        CustomerProfile.save((error, data) => {
+          if (error) {
+            res.writeHead(500, {
+              'Content-Type': 'text/plain'
+            })
+            res.end();
+          }
+          else {
+            res.writeHead(200, {
+              'Content-Type': 'text/plain'
+            })
+            res.end();
+          }
+        });
       }
     });
-
-
   });
-
 });
 
 //Route to handle Post Request Call for Restaurant SignUp
@@ -323,14 +324,17 @@ app.get("/customerProfile", function (req, res) {
   console.log("Inside Customer profile section");
   var idCustomers = req.query.idCustomers;
   console.log(idCustomers);
-  var sql = "SELECT * FROM Customers WHERE idCustomers = ?";
-  con.query(sql, [idCustomers], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(400).send("Unsuccessful To fetch details");
+
+  Customers.findById(idCustomers, (error, profile) => {
+    if (error) {
+        res.writeHead(400, {
+            'Content-Type': 'text/plain'
+        })
+        res.end();
     }
-    else {
-      res.status(200).send(result);
+    if (profile) {
+      res.status(200).send(profile);
+      console.log("get customer profile successful!");
     }
   });
 });
@@ -423,15 +427,35 @@ app.post("/restaurantEditNewDish", function (req, res) {
 //Route to update Customer Profile
 app.post("/updateCustomerProfile", function (req, res) {
   console.log("Inside Update customer profile section");
-  var sql = "UPDATE Customers SET FirstName= ?, LastName= ?,Email= ?,Phone=?,Favourites=?,DOB=?,City=?,State=?,Country=?,NickName=?,About=? WHERE idCustomers = ? ";
-  con.query(sql, [req.body.firstname, req.body.lastname, req.body.email, req.body.phone, req.body.favourites, req.body.dob, req.body.city, req.body.state, req.body.country, req.body.nickname, req.body.about, req.body.idCustomers], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To update details");
+
+  var updatedValues={
+   FirstName: req.body.firstname,
+   LastName: req.body.lastname,
+   Email: req.body.email,
+   Phone: req.body.phone,
+   Favourites: req.body.favourites,
+   DOB: req.body.dob,
+   City: req.body.city,
+   State: req.body.state,
+   Country: req.body.country,
+   NickName: req.body.nickname,
+  About: req.body.about
+  } 
+
+  Customers.findByIdAndUpdate(req.body.idCustomers,{ $set: updatedValues}, {useFindAndModify: false}, (error, profile) => {
+    if (error) {
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end();
     }
-    else {
-      res.status(200).send(" Customer UPDATED");
+    if (profile) {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain'
+      })
+      res.end("Customer Profile Updated");
     }
+
   });
 
 });
@@ -439,7 +463,6 @@ app.post("/updateCustomerProfile", function (req, res) {
 //Route to update Customer Password
 app.post("/updateCustomerPassword", function (req, res) {
   console.log("Inside Update customer password section");
-  var sql = "UPDATE Customers SET Password= ? WHERE idCustomers = ? ";
   async function hashPassword(password) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -448,15 +471,21 @@ app.post("/updateCustomerPassword", function (req, res) {
   }
   hashPassword(req.body.password).then((newPassword) => {
 
-    con.query(sql, [newPassword, req.body.idCustomers], function (err, result) {
-      if (err) {
-        console.log('SQL Error:', err);
-        res.status(205).send("Unsuccessful To update Password");
+
+    Customers.findByIdAndUpdate(req.body.idCustomers,{Password:newPassword}, {useFindAndModify: false}, (error, profile) => {
+      if (error) {
+        res.writeHead(205, {
+          "Content-Type": "text/plain",
+        });
+        res.end();
       }
-      else {
-        console.log("password change successful")
-        res.status(200).send(" Customer Password Updated.");
+      if (profile) {
+        res.writeHead(200, {
+          'Content-Type': 'text/plain'
+        })
+        res.end("Customer Password Updated");
       }
+  
     });
   });
 
@@ -491,7 +520,7 @@ app.post("/updateRestaurantPassword", function (req, res) {
 
 //Route to post customer review
 app.post("/postReview", function (req, res) {
-  console.log("Inside post customer review section",req.body.restaurantID);
+  console.log("Inside post customer review section", req.body.restaurantID);
   var sql = "INSERT INTO Reviews ( `restaurantID`, `customerID`, `reviewDate`, `ratings`, `comments`) VALUES (?, ?, now(), ?, ?)";
   con.query(sql, [req.body.restaurantID, req.body.customerID, req.body.ratings, req.body.comments], function (err, result) {
     if (err) {
