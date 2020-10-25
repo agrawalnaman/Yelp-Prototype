@@ -48,24 +48,24 @@ class CustomerProfile extends Component {
 
     componentDidMount() {
         if (cookie.load("cookie")) {
-        var data = { params: { idCustomers: +localStorage.getItem("c_id") } };
+        var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         console.log("c_id profile customer did mount", localStorage.getItem("c_id"));
         axios.get("http://localhost:3001/customerProfile", data).then((response) => {
             //update the state with the response data
-            console.log("profile did mount:", response.data[0]);
+            console.log("profile did mount:", response);
             this.setState({
                 profileUpdated: "",
-                email: response.data[0].Email,
-                phone: response.data[0].Phone,
-                firstname: response.data[0].FirstName,
-                lastname: response.data[0].LastName,
-                about: response.data[0].About,
-                favourites: response.data[0].Favourites,
-                dob: response.data[0].DOB,
-                city: response.data[0].City,
-                state: response.data[0].State,
-                country: response.data[0].Country,
-                nickname: response.data[0].NickName,
+                email: response.data.Email,
+                phone: response.data.Phone,
+                firstname: response.data.FirstName,
+                lastname: response.data.LastName,
+                about: response.data.About,
+                favourites: response.data.Favourites,
+                dob: response.data.DOB,
+                city: response.data.City,
+                state: response.data.State,
+                country: response.data.Country,
+                nickname: response.data.NickName,
             });
         });
     }
@@ -139,7 +139,7 @@ class CustomerProfile extends Component {
         console.log("inside submit new password");
         const data = {
             password: this.state.password,
-            idCustomers: +localStorage.getItem("c_id"),
+            idCustomers: localStorage.getItem("c_id"),
         };
         axios.defaults.withCredentials = true;
         axios
@@ -163,7 +163,7 @@ class CustomerProfile extends Component {
 
     getProfile = (e) => {
 
-        var data = { params: { idCustomers: +localStorage.getItem("c_id") } };
+        var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         axios.get("http://localhost:3001/customerProfile", data).then((response) => {
             //update the state with the response data
             console.log(response);
@@ -180,17 +180,17 @@ class CustomerProfile extends Component {
                                 <Accordion.Collapse eventKey="0">
                                     <Card.Body>
 
-                                        <p><label >Email ID : {response.data[0].Email}</label></p>
-                                        <p><label >First Name : {response.data[0].FirstName}</label></p>
-                                        <p><label >LastName : {response.data[0].LastName}</label></p>
-                                        <p><label >Country : {response.data[0].Country}</label></p>
-                                        <p><label >State : {response.data[0].State}</label></p>
-                                        <p><label >City : {response.data[0].City}</label></p>
-                                        <p><label >About : {response.data[0].About}</label></p>
-                                        <p><label >Favourites : {response.data[0].Favourites}</label></p>
-                                        <p><label >Date Of Birth : {response.data[0].DOB}</label></p>
-                                        <p><label >Phone : {response.data[0].Phone}</label></p>
-                                        <p><label >NickName : {response.data[0].NickName}</label></p>
+                                        <p><label >Email ID : {response.data.Email}</label></p>
+                                        <p><label >First Name : {response.data.FirstName}</label></p>
+                                        <p><label >LastName : {response.data.LastName}</label></p>
+                                        <p><label >Country : {response.data.Country}</label></p>
+                                        <p><label >State : {response.data.State}</label></p>
+                                        <p><label >City : {response.data.City}</label></p>
+                                        <p><label >About : {response.data.About}</label></p>
+                                        <p><label >Favourites : {response.data.Favourites}</label></p>
+                                        <p><label >Date Of Birth : {response.data.DOB}</label></p>
+                                        <p><label >Phone : {response.data.Phone}</label></p>
+                                        <p><label >NickName : {response.data.NickName}</label></p>
 
                                     </Card.Body>
                                 </Accordion.Collapse>
@@ -208,8 +208,9 @@ class CustomerProfile extends Component {
         var headers = new Headers();
         //prevent page from refresh
         e.preventDefault();
+        console.log("nnnnnn:",localStorage.getItem("c_id"));
         const data = {
-            idCustomers: +localStorage.getItem("c_id"),
+            idCustomers: localStorage.getItem("c_id"),
             email: this.state.email,
             country: this.state.country,
             firstname: this.state.firstname,

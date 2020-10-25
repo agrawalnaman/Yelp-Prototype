@@ -58,6 +58,8 @@ const { mongoDB } = require('./config');
 const mongoose = require('mongoose');
 const Customers = require('./Models/Customer');
 const Restaurants = require('./Models/Restaurant');
+
+const Events = require("./Models/Event");
 var options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -79,7 +81,7 @@ app.post("/customerLogin", function (req, res) {
   console.log("Inside Login Post Request");
   console.log("Req Body : ", req.body);
   var email = req.body.email;
-  Customers.findOne({ Email: req.body.email}, async function (err, result) {
+  Customers.findOne({ Email: req.body.email }, async function (err, result) {
     if (err) {
       console.log('Mongo Error:', err);
       res.writeHead(205, {
@@ -87,38 +89,38 @@ app.post("/customerLogin", function (req, res) {
       });
       res.end("Unsuccessful Login");
     }
-      console.log(result);
-      if (result) {
-        const isSame = await bcrypt.compare(req.body.password, result.Password);
-        console.log(isSame);
-        if (isSame === true) {
-          console.log("login successfull!");
-          res.cookie("cookie", "customer-admin", {
-            maxAge: 3600000,
-            httpOnly: false,
-            path: "/",
-          });
-          resjson = {
-            idCustomers: result._id.toString(), 
-            password: result.Password,
-          };
-          res.status(200).send(resjson);
-        }
-        else {
-          console.log('Error:', err);
-          res.writeHead(205, {
-            "Content-Type": "text/plain",
-          });
-          res.end("Unsuccessful Login");
-        }
+    console.log(result);
+    if (result) {
+      const isSame = await bcrypt.compare(req.body.password, result.Password);
+      console.log(isSame);
+      if (isSame === true) {
+        console.log("login successfull!");
+        res.cookie("cookie", "customer-admin", {
+          maxAge: 3600000,
+          httpOnly: false,
+          path: "/",
+        });
+        resjson = {
+          idCustomers: result._id.toString(),
+          password: result.Password,
+        };
+        res.status(200).send(resjson);
       }
       else {
-        console.log('Error2:', err);
+        console.log('Error:', err);
         res.writeHead(205, {
           "Content-Type": "text/plain",
         });
         res.end("Unsuccessful Login");
       }
+    }
+    else {
+      console.log('Error2:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful Login");
+    }
   });
 });
 
@@ -128,7 +130,7 @@ app.post("/restaurantLogin", function (req, res) {
   console.log("Inside Restaurant Login Post Request");
   console.log("Req Body : ", req.body);
   var email = req.body.email;
-  Restaurants.findOne({ Email: req.body.email}, async function (err, result) {
+  Restaurants.findOne({ Email: req.body.email }, async function (err, result) {
     if (err) {
       console.log('Mongo Error:', err);
       res.writeHead(205, {
@@ -136,38 +138,38 @@ app.post("/restaurantLogin", function (req, res) {
       });
       res.end("Unsuccessful Login");
     }
-      console.log(result);
-      if (result) {
-        const isSame = await bcrypt.compare(req.body.password, result.Password);
-        console.log(isSame);
-        if (isSame === true) {
-          console.log("login successfull!");
-          res.cookie("cookie", "resturant-admin", {
-            maxAge: 3600000,
-            httpOnly: false,
-            path: "/",
-          });
-          resjson = {
-            idRestaurants: result._id.toString(), 
-            password: result.Password,
-          };
-          res.status(200).send(resjson);
-        }
-        else {
-          console.log('Error:', err);
-          res.writeHead(205, {
-            "Content-Type": "text/plain",
-          });
-          res.end("Unsuccessful Login");
-        }
+    console.log(result);
+    if (result) {
+      const isSame = await bcrypt.compare(req.body.password, result.Password);
+      console.log(isSame);
+      if (isSame === true) {
+        console.log("login successfull!");
+        res.cookie("cookie", "restaurant-admin", {
+          maxAge: 3600000,
+          httpOnly: false,
+          path: "/",
+        });
+        resjson = {
+          idRestaurants: result._id.toString(),
+          password: result.Password,
+        };
+        res.status(200).send(resjson);
       }
       else {
-        console.log('Error2:', err);
+        console.log('Error:', err);
         res.writeHead(205, {
           "Content-Type": "text/plain",
         });
         res.end("Unsuccessful Login");
       }
+    }
+    else {
+      console.log('Error2:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful Login");
+    }
   });
 
 });
@@ -305,10 +307,10 @@ app.get("/restaurantProfile", function (req, res) {
   console.log(req.body, idRestaurants);
   Restaurants.findById(idRestaurants, (error, profile) => {
     if (error) {
-        res.writeHead(400, {
-            'Content-Type': 'text/plain'
-        })
-        res.end();
+      res.writeHead(400, {
+        'Content-Type': 'text/plain'
+      })
+      res.end();
     }
     if (profile) {
       res.status(200).send(profile);
@@ -325,14 +327,15 @@ app.get("/customerProfile", function (req, res) {
 
   Customers.findById(idCustomers, (error, profile) => {
     if (error) {
-        res.writeHead(400, {
-            'Content-Type': 'text/plain'
-        })
-        res.end();
+      console.log(error);
+      res.writeHead(400, {
+        'Content-Type': 'text/plain'
+      })
+      res.end();
     }
     if (profile) {
       res.status(200).send(profile);
-      console.log("get customer profile successful!");
+      console.log("get customer profile successful!", profile);
     }
   });
 });
@@ -342,58 +345,59 @@ app.get("/customerProfile", function (req, res) {
 app.post("/restaurantAddNewDish", function (req, res) {
   console.log("Inside Add new Dish Request");
   console.log("Req Body : ", req.body);
-  var idRestaurants = req.body.idRestaurants;
-  var dishName = req.body.dishName;
-  var price = req.body.price;
-  var category = req.body.category;
-  var imageURL = req.body.imageURL;
-  var ingredients = req.body.ingredients;
-  var sql_insert = "INSERT INTO Dishes (Name,Price,Ingredients,Image,Category,restaurantID) VALUES (?,?,?,?,?,?);";
-  con.query(sql_insert, [dishName, price, ingredients, imageURL, category, idRestaurants], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
+  var newDishDetails = {
+    
+      Name: req.body.dishName,
+      Price: req.body.price,
+      Category: req.body.category,
+      Image: req.body.imageURL,
+      Ingredients: req.body.ingredients
+    };
+  Restaurants.findByIdAndUpdate(req.body.idRestaurants, { $push:{dishes: newDishDetails} }, { useFindAndModify: false }, (error, dish) => {
+    if (error) {
       res.writeHead(205, {
         "Content-Type": "text/plain",
       });
-      res.end("failed to add new dish");
+      res.end();
     }
-    else {
-      console.log("add new dish successfull!");
+    if (dish) {
       res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end("added new dish");
+        'Content-Type': 'text/plain'
+      })
+      console.log("Dish Edited");
+      res.end("Dish Added");
     }
   });
-
 });
 
 // ADD events by restaurants
 app.post("/restaurantAddNewEvent", function (req, res) {
   console.log("Inside Add new event Request");
   console.log("Req Body : ", req.body);
-  var idRestaurants = req.body.idRestaurants;
-  var Name = req.body.name;
-  var Description = req.body.description;
-  var Time = req.body.time;
-  var Date = req.body.date;
-  var Location = req.body.location;
-  var Hashtags = req.body.hashtags;
-  var sql_insert = "INSERT INTO Events (`EventName`, `Description`, `Time`, `Date`, `Location`, `Hashtags`, `restaurantID`) VALUES (?,?,?,?,?,?,?);";
-  con.query(sql_insert, [Name, Description, Time, Date, Location, Hashtags, idRestaurants], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.writeHead(205, {
-        "Content-Type": "text/plain",
-      });
-      res.end("failed to add new event");
+  var eventDetails = new Events({
+
+    EventName: req.body.name,
+    Description: req.body.description,
+    Time: req.body.time,
+    Date: req.body.date,
+    Location: req.body.location,
+    Hashtags: req.body.hashtags,
+    restaurantevent: req.body.idRestaurants,
+  });
+  eventDetails.save((error, data) => {
+    if (error) {
+      res.writeHead(500, {
+        'Content-Type': 'text/plain'
+      })
+      console.log(error);
+      res.end("Unable to Add new Event");
     }
     else {
-      console.log("add new dish successfull!");
       res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end("added new event");
+        'Content-Type': 'text/plain'
+      })
+      console.log("New Event Added");
+      res.end("New Event Added");
     }
   });
 
@@ -402,45 +406,60 @@ app.post("/restaurantAddNewEvent", function (req, res) {
 //Update Menue Item By Customer
 app.post("/restaurantEditNewDish", function (req, res) {
   console.log("Inside Update Dishes Edit section");
-  var idRestaurants = req.body.idRestaurants;
-  var idDishes = req.body.idDishes;
-  var dishName = req.body.dishName;
-  var price = req.body.price;
-  var category = req.body.category;
-  var imageURL = req.body.imageURL;
-  var ingredients = req.body.ingredients;
-  var sql = "UPDATE Dishes SET Name= ?,Price= ?,Ingredients=?,Image=?,Category=? WHERE idDishes = ? ";
-  con.query(sql, [dishName, price, ingredients, imageURL, category, idDishes], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To Edit Dishes");
+
+  var newDishDetails = {
+    Name: req.body.dishName,
+    Price: req.body.price,
+    Category: req.body.category,
+    Image: req.body.imageURL,
+    Ingredients: req.body.ingredients,
+  };
+  //console.log("dishes:",newDishDetails);
+  var set={};
+  for (var field in newDishDetails) {
+    set['dishes.$.' + field] = newDishDetails[field];
+  }
+  Restaurants.update({_id:req.body.idRestaurants,"dishes._id":req.body.idDishes}, { $set: set }, { useFindAndModify:false  }, (error, dish) => {
+    if (error) {
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      console.log(error);
+
+      res.end();
     }
-    else {
-      res.status(200).send("Dish UPDATED");
+    if (dish) {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain'
+      })
+      console.log("Dish Edited");
+      res.end("Dish Edited");
     }
+
   });
+
 
 });
 
 //Route to update Customer Profile
 app.post("/updateCustomerProfile", function (req, res) {
   console.log("Inside Update customer profile section");
+  console.log(req.body);
+  var updatedValues = {
+    FirstName: req.body.firstname,
+    LastName: req.body.lastname,
+    Email: req.body.email,
+    Phone: req.body.phone,
+    Favourites: req.body.favourites,
+    DOB: req.body.dob,
+    City: req.body.city,
+    State: req.body.state,
+    Country: req.body.country,
+    NickName: req.body.nickname,
+    About: req.body.about
+  };
 
-  var updatedValues={
-   FirstName: req.body.firstname,
-   LastName: req.body.lastname,
-   Email: req.body.email,
-   Phone: req.body.phone,
-   Favourites: req.body.favourites,
-   DOB: req.body.dob,
-   City: req.body.city,
-   State: req.body.state,
-   Country: req.body.country,
-   NickName: req.body.nickname,
-  About: req.body.about
-  } 
-
-  Customers.findByIdAndUpdate(req.body.idCustomers,{ $set: updatedValues}, {useFindAndModify: false}, (error, profile) => {
+  Customers.findByIdAndUpdate(req.body.idCustomers, { $set: updatedValues }, { useFindAndModify: false }, (error, profile) => {
     if (error) {
       res.writeHead(205, {
         "Content-Type": "text/plain",
@@ -470,7 +489,7 @@ app.post("/updateCustomerPassword", function (req, res) {
   hashPassword(req.body.password).then((newPassword) => {
 
 
-    Customers.findByIdAndUpdate(req.body.idCustomers,{Password:newPassword}, {useFindAndModify: false}, (error, profile) => {
+    Customers.findByIdAndUpdate(req.body.idCustomers, { Password: newPassword }, { useFindAndModify: false }, (error, profile) => {
       if (error) {
         res.writeHead(205, {
           "Content-Type": "text/plain",
@@ -483,7 +502,7 @@ app.post("/updateCustomerPassword", function (req, res) {
         })
         res.end("Customer Password Updated");
       }
-  
+
     });
   });
 
@@ -500,7 +519,7 @@ app.post("/updateRestaurantPassword", function (req, res) {
   }
   hashPassword(req.body.password).then((newPassword) => {
 
-    Restaurants.findByIdAndUpdate(req.body.idRestaurants,{Password:newPassword}, {useFindAndModify: false}, (error, profile) => {
+    Restaurants.findByIdAndUpdate(req.body.idRestaurants, { Password: newPassword }, { useFindAndModify: false }, (error, profile) => {
       if (error) {
         res.writeHead(205, {
           "Content-Type": "text/plain",
@@ -514,7 +533,7 @@ app.post("/updateRestaurantPassword", function (req, res) {
         console.log("restaurant password updated");
         res.end("Restuarant Password Updated");
       }
-  
+
     });
   });
 
@@ -541,35 +560,37 @@ app.post("/postReview", function (req, res) {
 //Route to place order by customer 
 app.post("/submitOrder", function (req, res) {
   console.log("Inside place order by customer  section", req.body);
-  var sql = "INSERT INTO Orders (deliveryMode,customerID,restaurantID,time,orderStatus) VALUES (?,?,?,now(),?)";
-  var sql1 = "INSERT INTO OrderDetails (`orderID`, `dishID`, `quantity`) VALUES (?, ?, ?)";
-  con.query(sql, [req.body.deliverymode, req.body.idCustomers, req.body.finalorder[0].restaurantID, "orderrecieved"], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To submit Order");
-    }
-    else {
 
-      req.body.finalorder.forEach(function (orderItem) {
 
-        con.query(sql1, [result.insertId, orderItem.idDishes, orderItem.quantity], function (err, result) {
-          if (err) {
-            console.log('SQL Error:', err);
-            res.status(205).send("Unsuccessful to insert into order details");
-          }
-        });
+  // var sql = "INSERT INTO Orders (deliveryMode,customerID,restaurantID,time,orderStatus) VALUES (?,?,?,now(),?)";
+  // var sql1 = "INSERT INTO OrderDetails (`orderID`, `dishID`, `quantity`) VALUES (?, ?, ?)";
+  // con.query(sql, [req.body.deliverymode, req.body.idCustomers, req.body.finalorder[0].restaurantID, "orderrecieved"], function (err, result) {
+  //   if (err) {
+  //     console.log('SQL Error:', err);
+  //     res.status(205).send("Unsuccessful To submit Order");
+  //   }
+  //   else {
 
-      });
-      console.log("last transaction id:", result);
-      res.status(200).send("order Submitted");
-    }
-  });
+  //     req.body.finalorder.forEach(function (orderItem) {
+
+  //       con.query(sql1, [result.insertId, orderItem.idDishes, orderItem.quantity], function (err, result) {
+  //         if (err) {
+  //           console.log('SQL Error:', err);
+  //           res.status(205).send("Unsuccessful to insert into order details");
+  //         }
+  //       });
+
+  //     });
+  //     console.log("last transaction id:", result);
+  //     res.status(200).send("order Submitted");
+  //   }
+  // });
 
 });
 //Route to update Restaurant Profile
 app.post("/updateRestaurantProfile", function (req, res) {
   console.log("Inside Update Restaurant profile section");
-  var updatedValues={
+  var updatedValues = {
     Name: req.body.name,
     Email: req.body.email,
     Password: req.body.password,
@@ -577,59 +598,66 @@ app.post("/updateRestaurantProfile", function (req, res) {
     Location: req.body.location,
     Description: req.body.description,
     Timings: req.body.timings,
-    deliveryMode:req.body.deliveryMode
-   } 
- 
-   Restaurants.findByIdAndUpdate(req.body.idRestaurants,{ $set: updatedValues}, {useFindAndModify: false}, (error, profile) => {
-     if (error) {
-       res.writeHead(205, {
-         "Content-Type": "text/plain",
-       });
-       res.end();
-     }
-     if (profile) {
-       res.writeHead(200, {
-         'Content-Type': 'text/plain'
-       })
-       res.end("Restuarant Profile Updated");
-     }
- 
-   });
- 
+    deliveryMode: req.body.deliveryMode
+  }
+
+  Restaurants.findByIdAndUpdate(req.body.idRestaurants, { $set: updatedValues }, { useFindAndModify: false }, (error, profile) => {
+    if (error) {
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end();
+    }
+    if (profile) {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain'
+      })
+      res.end("Restuarant Profile Updated");
+    }
+
+  });
+
 
 });
 
 //Route to register a customer to event
 app.post("/registerCustomerEvent", function (req, res) {
   console.log("Inside register customer event section", req.body.idEvents);
-  var sql1 = "INSERT INTO EventRegistration (`EventID`, `CustomerID`) VALUES (?, ?)";
-  var sql2 = "SELECT * From EventRegistration where CustomerID=? AND EventID=?";
-  //var sql = "UPDATE Restaurants SET Name= ?,Email= ?,Password=?,Contact=?,Location=?,Description=?,Timings=?,PictureOfRestaurants=?,PicturesOfDishes=? WHERE idRestaurants = ? ";
-  con.query(sql2, [req.body.idCustomers, req.body.idEvents], function (err, result) {
+  Events.findById(req.body.idEvents, async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To register to event");
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      console.log("error1");
+      res.end("Unsuccessful Login");
     }
-    else {
-      if (result.length === 0) {
-
-        con.query(sql1, [req.body.idEvents, req.body.idCustomers], function (err, result) {
-          if (err) {
-            console.log('SQL Error:', err);
-            res.status(205).send("Unsuccessful To register to event");
+    if (result) {
+      var a = result.customerevent;
+      if (a !== undefined && a.includes(req.body.idCustomers)) {
+        res.status(205).send("Already exists");
+        console.log("error2");
+      }
+      else {
+        Events.findByIdAndUpdate(req.body.idEvents, { $push: { customerevent: req.body.idCustomers } }, { useFindAndModify: false }, (error, profile) => {
+          if (error) {
+            res.writeHead(205, {
+              "Content-Type": "text/plain",
+            });
+            console.log("error3");
+            res.end();
           }
-          else {
-            res.status(200).send("Registered to Event");
+          if (profile) {
+            console.log("registered");
+            res.writeHead(200, {
+              'Content-Type': 'text/plain'
+            })
+            res.end("Event registered");
           }
 
         });
 
       }
-      else {
-        res.status(205).send("Unsuccessful To register to event");
-
-      }
-
     }
   });
 
@@ -652,19 +680,22 @@ app.get("/getRestaurantOrders", function (req, res) {
   });
 });
 
-//Route to list of orders by customers for a restaurant
+//get restaurant dishes
 app.get("/getRestaurantDishes", function (req, res) {
-  console.log("Inside Restaurant orders section");
+  console.log("Inside Restaurant dishes get section");
   var idRestaurants = req.query.idRestaurants;
   console.log(idRestaurants);
-  var sql = "SELECT * FROM Dishes WHERE restaurantID = ? order by Category";
-  con.query(sql, [idRestaurants], function (err, result) {
+  Restaurants.findById( idRestaurants , async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
-      res.status(400).send("Unsuccessful To orders list");
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch all the Dishes");
     }
     else {
       res.status(200).send(result);
+      console.log("Get Dishes Successful");
     }
   });
 });
@@ -674,105 +705,80 @@ app.get("/getRestaurantEvents", function (req, res) {
   console.log("Inside Restaurant Events section");
   var idRestaurants = req.query.idRestaurants;
   console.log(idRestaurants);
-  var sql = "SELECT * FROM Events WHERE restaurantID = ?";
-  con.query(sql, [idRestaurants], function (err, result) {
+  Events.find({ restaurantevent: idRestaurants }, async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
-      res.status(400).send("Unsuccessful To orders list");
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch Events");
     }
     else {
       res.status(200).send(result);
+      console.log("Get Events Successful");
     }
   });
 });
 
 //Route to list upcoming events for customers 
-app.get("/getUpcomingEvents", function (req, res) {
+app.get("/getUpcomingEvents", async function (req, res) {
   console.log("Inside Upcoming Events section", req.query.name);
-  var sql1 = "SELECT Events.*, Restaurants.Name FROM Events INNER JOIN Restaurants ON Events.restaurantID=Restaurants.idRestaurants";
-  //var sql = "SELECT * FROM Events WHERE Name = ?";
-  con.query(sql1, function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To Search Event");
-    }
-    else {
-      if (result.length === 0) {
-        res.status(205).send("events not found");
-      }
-      else {
-        res.status(200).send(result);
-        console.log("event search success", result);
-      }
-    }
-  });
+  Events.find({}).
+    populate('restaurantevent', 'Name').
+    exec(function (err, eventInfo) {
+      if (err) return handleError(err);
+      console.log('The Event is:', JSON.stringify(eventInfo));
+      res.status(200).send(eventInfo);
+    });
 });
 
 //Route for customer list for a event for restaurants
 app.get("/getCustomerListEvent", function (req, res) {
   console.log("Inside Customer list events section", req.query.idEvents);
-  var sql1 = "SELECT Customers.* FROM EventRegistration INNER JOIN Customers ON Customers.idCustomers=EventRegistration.CustomerID WHERE EventRegistration.EventID=?";
-  //var sql = "SELECT * FROM Events WHERE Name = ?";
-  con.query(sql1, [req.query.idEvents], function (err, result) {
+  Events.findById(req.query.idEvents, async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To fetch list of customers");
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch Events");
     }
     else {
-      if (result.length === 0) {
-        res.status(205).send("Customers not found");
-      }
-      else {
-        res.status(200).send(result);
-        console.log("event search success", result);
-      }
+      res.status(200).send(result);
+      console.log("********************", result);
     }
-  });
+  }).populate('customerevent');
 });
 
 //Route to list upcoming events for customers 
 app.get("/getRegisteredEvents", function (req, res) {
   console.log("Inside Registered Events section", req.query.idCustomers);
-  var sql1 = "SELECT Events.* FROM Events INNER JOIN EventRegistration ON EventRegistration.EventID=Events.idEvents where EventRegistration.CustomerID=?";
-  //var sql = "SELECT * FROM Events WHERE Name = ?";
-  con.query(sql1, [req.query.idCustomers], function (err, result) {
+  Events.find({ customerevent: req.query.idCustomers }, async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To Search Event");
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch Events");
     }
     else {
-      if (result.length === 0) {
-        res.status(205).send("events not found");
-      }
-      else {
-        res.status(200).send(result);
-        console.log("event search success", result);
-      }
+      res.status(200).send(result);
+      console.log("********************", result);
     }
-  });
+  }).populate('restaurantevent', 'Name');
+
 });
 
 
 //Route to list of search events by customers 
 app.get("/getSearchEvents", function (req, res) {
   console.log("Inside Search Events section", req.query.name);
-  var sql1 = "SELECT Events.*, Restaurants.Name FROM Events INNER JOIN Restaurants ON Events.restaurantID=Restaurants.idRestaurants WHERE EventName = ?";
-  //var sql = "SELECT * FROM Events WHERE Name = ?";
-  con.query(sql1, [req.query.name], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To Search Event");
-    }
-    else {
-      if (result.length === 0) {
-        res.status(205).send("event not found");
-      }
-      else {
-        res.status(200).send(result);
-        console.log("event search success", result);
-      }
-    }
-  });
+  Events.find({ EventName: req.query.name }).populate('restaurantevent', 'Name').
+    exec(function (err, eventInfo) {
+      if (err) return handleError(err);
+      console.log('The Event is:', JSON.stringify(eventInfo));
+      res.status(200).send(eventInfo);
+    });
 });
 
 //Route to list of search restaurants by customers 

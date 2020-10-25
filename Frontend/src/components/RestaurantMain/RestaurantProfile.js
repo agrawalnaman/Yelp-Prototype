@@ -28,20 +28,20 @@ class RestaurantProfile extends Component {
     }
 
     componentDidMount() {
-        var data = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+        var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         console.log("r_id profile resturant did mount",localStorage.getItem("r_id")); 
         if (cookie.load("cookie")) {
         axios.get("http://localhost:3001/restaurantProfile", data).then((response) => {
             //update the state with the response data
-            console.log("profile did mount:",response.data[0]);
+            console.log("profile did mount:",response.data);
             this.setState({
                 profileUpdated:"",
-                email:response.data[0].Email,
-                name: response.data[0].Name,
-                location:response.data[0].Location,
-                description:response.data[0].Description,
-                contact:response.data[0].Contact,
-                timings:response.data[0].Timings,
+                email:response.data.Email,
+                name: response.data.Name,
+                location:response.data.Location,
+                description:response.data.Description,
+                contact:response.data.Contact,
+                timings:response.data.Timings,
             });
         });
     }
@@ -89,7 +89,7 @@ class RestaurantProfile extends Component {
       console.log("inside submit new password restaurant");
       const data = {
           password: this.state.password,
-          idRestaurants: +localStorage.getItem("r_id"),
+          idRestaurants: localStorage.getItem("r_id"),
       };
       axios.defaults.withCredentials = true;
       axios
@@ -116,7 +116,7 @@ class RestaurantProfile extends Component {
         //prevent page from refresh
         e.preventDefault();
         const data = {
-          idRestaurants:+localStorage.getItem("r_id"),
+          idRestaurants:localStorage.getItem("r_id"),
           email: this.state.email,
           location: this.state.location,
           name: this.state.name,

@@ -1,6 +1,16 @@
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+const dishDetails = new Schema({
+    Name: {type: String, required: true},
+    Price: {type: String, required: true},
+    Ingredients: {type: String, required: true},
+    Image: {type: String},
+    Category: {type: String}
+},
+{
+    versionKey: false
+});
 var restaurantProfile = new Schema({
     Name: {type: String, required: true},
     Email: {type: String, required: true},
@@ -10,7 +20,8 @@ var restaurantProfile = new Schema({
     Contact: {type: String},
     Timings: {type: String},
     deliveryMode: {type: String},
-    PictureOfRestaurants:{type:String}
+    PictureOfRestaurants:{type:String},
+    dishes:[dishDetails]
 },
 {
     versionKey: false

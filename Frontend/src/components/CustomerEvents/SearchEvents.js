@@ -51,10 +51,10 @@ class SearchEvents extends Component {
     registerHandler = (e) => {
         var headers = new Headers();
         //prevent page from refresh
-        console.log("register",e.idEvents);
+        console.log("register",e._id);
         const data = {
-            idCustomers:+localStorage.getItem("c_id"),
-            idEvents: e.idEvents,
+            idCustomers:localStorage.getItem("c_id"),
+            idEvents: e._id,
          };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
@@ -156,7 +156,7 @@ class SearchEvents extends Component {
                                     <Button variant="primary" onClick={() => this.registerHandler(d)}>Register</Button>
                                     </OverlayTrigger>
                                         <Card.Header as="h5"> Event Name : {d.EventName}</Card.Header>
-                                        <Card.Header as="h5"> Restaurant : {d.Name}</Card.Header>
+                                        <Card.Header as="h5"> Restaurant : {d.restaurantevent[0].Name}</Card.Header>
                                         <Accordion.Toggle as={Button} variant="link" eventKey="0">
                                             Click To View Event Details
                                     </Accordion.Toggle>

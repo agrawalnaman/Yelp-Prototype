@@ -54,7 +54,7 @@ class Dishes extends Component {
             ingredients: d.Ingredients,
             category: d.Category,
             imageURL: d.Image,
-            idDishes: d.idDishes,
+            idDishes: d._id,
         });
     };
     dishNameChangeHandler = (e) => {
@@ -83,12 +83,12 @@ class Dishes extends Component {
         });
     };
     componentDidMount() {
-        var data = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+        var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.get("http://localhost:3001/getRestaurantDishes", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                dishes: response.data,
+                dishes: response.data.dishes,
                 addDishModal: false,
                 editDishModal: false,
                 dishName: "",
@@ -109,7 +109,7 @@ class Dishes extends Component {
         //prevent page from refresh
         e.preventDefault();
         const data = {
-            idRestaurants: +localStorage.getItem("r_id"),
+            idRestaurants: localStorage.getItem("r_id"),
             dishName: this.state.dishName,
             price: this.state.price,
             ingredients: this.state.ingredients,
@@ -128,12 +128,12 @@ class Dishes extends Component {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     window.alert("Dish Edited Successfully");
-                    var data1 = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+                    var data1 = { params: { idRestaurants: localStorage.getItem("r_id") } };
             axios.get("http://localhost:3001/getRestaurantDishes", data1).then((response) => {
                 //update the state with the response data
                 console.log(response.data);
                 this.setState({
-                    dishes: response.data,
+                    dishes: response.data.dishes,
                     addDishModal: false,
                     editDishModal: false,
                     dishName: "",
@@ -165,7 +165,7 @@ class Dishes extends Component {
         //prevent page from refresh
         e.preventDefault();
         const data = {
-            idRestaurants: +localStorage.getItem("r_id"),
+            idRestaurants: localStorage.getItem("r_id"),
             dishName: this.state.dishName,
             price: this.state.price,
             ingredients: this.state.ingredients,
@@ -183,12 +183,12 @@ class Dishes extends Component {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     window.alert("Dish Added To Menu!");
-                    var data2 = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+                    var data2 = { params: { idRestaurants: localStorage.getItem("r_id") } };
             axios.get("http://localhost:3001/getRestaurantDishes", data2).then((response) => {
                 //update the state with the response data
                 console.log(response.data);
                 this.setState({
-                    dishes: response.data,
+                    dishes: response.data.dishes,
                     addDishModal: false,
                     editDishModal: false,
                     dishName: "",
@@ -331,7 +331,7 @@ class Dishes extends Component {
                                         Ingredients : {d.Ingredients}
                                     </Card.Text>
                                     <Card.Text>
-                                        Dish ID : {d.idDishes}
+                                        Dish ID : {d._id}
                                     </Card.Text>
                                 </Card.Body>
                                 <Card.Footer>

@@ -37,7 +37,7 @@ class ListUpcomingEvents extends Component {
         axios
             .get("http://localhost:3001/getUpcomingEvents")
             .then((response) => {
-                console.log("Status Code : ", response.status);
+                console.log("Status Code : ", response.data);
                 if (response.status === 200) {
                     this.setState({
                         event: response.data,
@@ -74,7 +74,7 @@ class ListUpcomingEvents extends Component {
                                 <Card>
                                     <Card.Header>
                                         <Card.Header as="h5"> Event Name : {d.EventName}</Card.Header>
-                                        <Card.Header as="h5"> Restaurant : {d.Name}</Card.Header>
+                                        <Card.Header as="h5"> Restaurant : {d.restaurantevent[0].Name}</Card.Header>
                                         <Accordion.Toggle as={Button} variant="link" eventKey="0">
                                             Click To View Event Details
                                     </Accordion.Toggle>

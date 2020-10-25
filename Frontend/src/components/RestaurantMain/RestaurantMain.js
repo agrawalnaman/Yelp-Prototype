@@ -27,6 +27,7 @@ class RestaurantMain extends Component {
         let redirectVar = null;
         let invalidCredentials = null;
         if (!cookie.load("cookie")) {
+            console.log("cookie not found");
             redirectVar = <Redirect to="/login" />;
         }
 

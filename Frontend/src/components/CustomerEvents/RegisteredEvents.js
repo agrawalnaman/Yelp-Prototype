@@ -28,7 +28,7 @@ class RegisteredEvents extends Component {
     componentDidMount() {
         var headers = new Headers();
         //prevent page from refresh
-      var data = { params: { idCustomers: +localStorage.getItem("c_id") } };
+      var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         console.log("name of event:", this.state.name);
         //set the with credentials to true
         axios.defaults.withCredentials = true;
@@ -94,7 +94,7 @@ class RegisteredEvents extends Component {
                                                 Hashtags : {d.Hashtags}
                                             </Card.Text>
                                             <Card.Text>
-                                            Restaurant : {d.restaurantID}
+                                            Restaurant : {d.restaurantevent[0].Name}
                                             </Card.Text>
                                         </Card.Body>
                                     </Accordion.Collapse>

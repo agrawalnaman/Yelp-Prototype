@@ -85,7 +85,7 @@ class RestaurantEvents extends Component {
         });
     };
     componentDidMount() {
-        var data = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+        var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.get("http://localhost:3001/getRestaurantEvents", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
@@ -115,7 +115,7 @@ class RestaurantEvents extends Component {
         //prevent page from refresh
         e.preventDefault();
         const data = {
-            idRestaurants: +localStorage.getItem("r_id"),
+            idRestaurants: localStorage.getItem("r_id"),
             name:this.state.name,
             description:this.state.description,
             time:this.state.time,
@@ -134,7 +134,7 @@ class RestaurantEvents extends Component {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     window.alert("Event Added");
-                    var data1 = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+                    var data1 = { params: { idRestaurants: localStorage.getItem("r_id") } };
                     axios.get("http://localhost:3001/getRestaurantEvents", data1).then((response) => {
                         //update the state with the response data
                         console.log(response.data);
@@ -169,18 +169,18 @@ class RestaurantEvents extends Component {
     customerListHandler = (d) => {
  
 
-        var data = { params: { idEvents: d.idEvents } };
+        var data = { params: { idEvents: d._id } };
         axios.get("http://localhost:3001/getCustomerListEvent", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                customerList:response.data,
+                customerList:response.data.customerevent,
             });
         });
         console.log(this.state.customerList);
         this.setState({
             customerListModal: true,
-            customerListEventID: d.idEvents,
+            customerListEventID: d._id,
         });
 
     };
@@ -246,7 +246,7 @@ class RestaurantEvents extends Component {
                     return(
                         <Link to={{ 
                             pathname: "/CustomerProfileModular", 
-                            state: d.idCustomers, 
+                            state: d._id, 
                            }}>
                             {d.FirstName} {d.LastName}
                            </Link>
@@ -275,7 +275,7 @@ class RestaurantEvents extends Component {
                             <Card style={{ width: '25rem' }} bg={'danger'}  className="mb-2" text={'white'}>
                                 <Card.Header as="h5">Name : {d.EventName}</Card.Header>
                                 <Card.Body>
-                                    <Card.Title>Event Id : {d.idEvents}</Card.Title>
+                                    <Card.Title>Event Id : {d._id}</Card.Title>
                                     <Card.Text>
                                         Description : {d.Description}
                                     </Card.Text>
