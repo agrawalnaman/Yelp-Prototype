@@ -8,17 +8,8 @@ var cookieParser = require("cookie-parser");
 var cors = require("cors");
 app.set("view engine", "ejs");
 const bcrypt = require('bcrypt');
-//connect to MySQL
-var mysql = require('mysql');
 const { response } = require("express");
 module.exports = app;
-var con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
-  database: "Yelp",
-});
-
 //use cors to allow cross origin resource sharing
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
@@ -238,10 +229,6 @@ app.post("/restaurantSignUp", async function (req, res) {
   var email = req.body.email;
   var Name = req.body.restaurantname;
   var location = req.body.location;
-  var sql_findEmail = "SELECT * FROM Restaurants WHERE Email = ?";
-  var sql_insert = "INSERT INTO Restaurants (Email,Name,Password,Location) VALUES (?,?,?,?)";
-
-
   async function hashPassword(password) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -543,16 +530,30 @@ app.post("/updateRestaurantPassword", function (req, res) {
 //Route to post customer review
 app.post("/postReview", function (req, res) {
   console.log("Inside post customer review section", req.body.restaurantID);
-  var sql = "INSERT INTO Reviews ( `restaurantID`, `customerID`, `reviewDate`, `ratings`, `comments`) VALUES (?, ?, now(), ?, ?)";
-  con.query(sql, [req.body.restaurantID, req.body.customerID, req.body.ratings, req.body.comments], function (err, result) {
-    if (err) {
-      console.log('SQL Error:', err);
-      res.status(205).send("Unsuccessful To Post Review");
+  var d = new Date();
+  var newReview={
+    customerID: req.body.customerID,
+    ratings: req.body.ratings,
+    comments: req.body.comments,
+    time:d.getTime(),
+  };
+  Restaurants.findByIdAndUpdate(req.body.restaurantID, { $push:{reviews: newReview} }, { useFindAndModify: false }, (error, review) => {
+    if (error) {
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      console.log(error);
+      res.end();
     }
-    else {
-      res.status(200).send("Review Posted");
+    if (review) {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain'
+      })
+      console.log("Review Posted");
+      res.end("Review Posted");
     }
   });
+
 
 });
 
@@ -864,16 +865,19 @@ app.get("/getRestaurantReviews", function (req, res) {
   console.log("Inside Restaurant orders section");
   var idRestaurants = req.query.idRestaurants;
   console.log("reviews for restaurant :", idRestaurants);
-  var sql = "SELECT * FROM Reviews WHERE `restaurantID` = ? order by `customerID`";
-  con.query(sql, [idRestaurants], function (err, result) {
+  Restaurants.findById(idRestaurants, async function (err, result) {
     if (err) {
-      console.log('SQL Error:', err);
-      res.status(400).send("Unsuccessful To find review list");
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch Events");
     }
     else {
       res.status(200).send(result);
+      console.log("********************", result);
     }
-  });
+  })
 });
 
 

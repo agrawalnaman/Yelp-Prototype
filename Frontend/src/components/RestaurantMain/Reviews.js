@@ -4,6 +4,7 @@ import axios from "axios";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import Table from 'react-bootstrap/Table';
+import { Link } from "react-router-dom";
 //Define a Login Component
 class Reviews extends Component {
     //call the constructor method
@@ -18,12 +19,12 @@ class Reviews extends Component {
     }
 
     componentDidMount() {
-        var data = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+        var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.get("http://localhost:3001/getRestaurantReviews", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                reviews: response.data,
+                reviews: response.data.reviews,
             });
         });
     }
@@ -48,11 +49,16 @@ class Reviews extends Component {
                             return (
 
                                 <tr>
-                                    <td>{d.idReviews}</td>
+                                    <td>{d._id}</td>
+                                    <Link to={{
+                                        pathname: "/CustomerProfileModular",
+                                        state: d.customerID,
+                                    }}>
                                     <td>{d.customerID}</td>
+                                    </Link>
                                     <td>{d.comments}</td>
                                     <td>{d.ratings}</td>
-                                    <td>{d.reviewDate}</td>
+                                    <td>{d.time}</td>
                                 </tr>
                             )
                         }) : ""}

@@ -13,6 +13,16 @@ const dishDetails = new Schema({
 {
     versionKey: false
 });
+const reviewDetails = new Schema({
+    customerID:  {type: String, required: true},
+    ratings: {type: String},
+    comments: {type: String},
+    time:{type:String}
+
+},
+{
+    versionKey: false
+});
 
 const orderDetails = new Schema({
     deliveryMode:{type: String, required: true},
@@ -42,7 +52,8 @@ var restaurantProfile = new Schema({
     deliveryMode: {type: String},
     PictureOfRestaurants:{type:String},
     dishes:[dishDetails],
-    orders:[orderDetails]
+    orders:[orderDetails],
+    reviews:[reviewDetails]
 },
 {
     versionKey: false
