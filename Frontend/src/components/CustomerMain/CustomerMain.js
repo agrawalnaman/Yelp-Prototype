@@ -176,7 +176,7 @@ class CustomerMain extends Component {
                                             <Card.Header as="h5"> Cuisine : {d.Cuisine}</Card.Header>
                                             <Link to={{
                                                 pathname: "/RestaurantPage",
-                                                state: d.idRestaurants,
+                                                state: d._id,
                                             }}>
                                                 <Accordion.Toggle as={Button} variant="link" eventKey="0">
                                                     Take me to Restaurant's Page!

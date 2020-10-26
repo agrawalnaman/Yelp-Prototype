@@ -34,9 +34,9 @@ class RestaurantPage extends Component {
        
         axios.get("http://localhost:3001/restaurantProfile", data).then((response) => {
             //update the state with the response data
-            console.log("profile did mount:", response.data[0]);
+            console.log("profile did mount:", response.data);
             this.setState({
-                restaurantID: response.data[0].idRestaurants,
+                restaurantID: response.data._id,
                 profile: (
                     <Card>
                         <Card.Header>
@@ -45,12 +45,12 @@ class RestaurantPage extends Component {
 
                         <Card.Body>
 
-                            <p><label >Email ID : {response.data[0].Email}</label></p>
-                            <p><label >Name : {response.data[0].Name}</label></p>
-                            <p><label >Location : {response.data[0].Location}</label></p>
-                            <p><label >Description : {response.data[0].Description}</label></p>
-                            <p><label >Contact : {response.data[0].Contact}</label></p>
-                            <p><label >Timings : {response.data[0].Timings}</label></p>
+                            <p><label >Email ID : {response.data.Email}</label></p>
+                            <p><label >Name : {response.data.Name}</label></p>
+                            <p><label >Location : {response.data.Location}</label></p>
+                            <p><label >Description : {response.data.Description}</label></p>
+                            <p><label >Contact : {response.data.Contact}</label></p>
+                            <p><label >Timings : {response.data.Timings}</label></p>
 
                         </Card.Body>
                     </Card>),
@@ -74,7 +74,7 @@ class RestaurantPage extends Component {
         //prevent page from refresh
         e.preventDefault();
         const data = {
-            customerID: +localStorage.getItem("c_id"),
+            customerID: localStorage.getItem("c_id"),
             restaurantID: this.state.restaurantID,
             ratings: this.state.rating,
             comments: this.state.comments,

@@ -14,8 +14,8 @@ export default function Products({ setCart, cart,restaurantID }) {
         console.log("nmn rest ID:",restaurantID);
         var data = { params: { idRestaurants:restaurantID} };
       const result =await axios.get("http://localhost:3001/getRestaurantDishes", data);
-        console.log("products:",result);
-      setData(result.data);
+        console.log("products:",result.data.dishes);
+      setData(result.data.dishes);
     };
  
      fetchData();

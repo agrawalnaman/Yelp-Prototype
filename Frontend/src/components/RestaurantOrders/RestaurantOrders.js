@@ -37,7 +37,7 @@ class ResturantOrders extends Component {
     editOrderStatusHandler = (d) => {
         this.setState({
             orderStatusModal: true,
-            idOrders: d.idOrders,
+            idOrders: d._id,
             status: d.orderStatus,
             deliveryMode: d.deliveryMode,
         });
@@ -51,13 +51,13 @@ class ResturantOrders extends Component {
     };
 
     componentDidMount() {
-        var data = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+        var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.get("http://localhost:3001/getRestaurantOrders", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                orders: response.data,
-                filteredorders: response.data,
+                orders: response.data.orders,
+                filteredorders: response.data.orders,
                 orderStatusModal: false,
                 orderStatusEdited: "",
                 deliveryMode: "",
@@ -104,6 +104,7 @@ class ResturantOrders extends Component {
         const data = {
             orderstatus: this.state.status,
             idOrders: this.state.idOrders,
+            idRestaurants: localStorage.getItem("r_id") 
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
@@ -115,13 +116,13 @@ class ResturantOrders extends Component {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     window.alert("Order Status Updated");
-                    var data = { params: { idRestaurants: +localStorage.getItem("r_id") } };
+                    var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
                     axios.get("http://localhost:3001/getRestaurantOrders", data).then((response) => {
                         //update the state with the response data
                         console.log(response.data);
                         this.setState({
-                            orders: response.data,
-                            filteredorders: response.data,
+                            orders: response.data.orders,
+                            filteredorders: response.data.orders,
                             orderStatusModal: false,
                             orderStatusEdited: "",
                             deliveryMode: "",
@@ -210,16 +211,16 @@ class ResturantOrders extends Component {
                             <Card style={{ width: '25rem' }}>
                                 <Card.Header as="h5"> Category : {d.deliveryMode}</Card.Header>
                                 <Card.Body>
-                                    <Card.Title>  Order ID : {d.idOrders}</Card.Title>
+                                    <Card.Title>  Order ID : {d._id}</Card.Title>
                                     <Card.Text>
                                         Time : {d.time}
                                     </Card.Text>
                                     <Link to={{
                                         pathname: "/CustomerProfileModular",
-                                        state: d.customerID,
+                                        state: d.idCustomers,
                                     }}>
                                         <Card.Text>
-                                            Customer ID :{d.customerID}
+                                            Customer ID :{d.idCustomers}
                                         </Card.Text>
                                     </Link>
                                 </Card.Body>

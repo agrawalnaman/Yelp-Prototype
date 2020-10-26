@@ -35,13 +35,21 @@ class CustomerOrders extends Component {
 
 
     componentDidMount() {
-        var data = { params: { idCustomers: +localStorage.getItem("c_id") } };
+        var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         axios.get("http://localhost:3001/getCustomerOrders", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
+            const orderList = [];
+            if(response.data!==""&&response.data!==undefined)
+            {
+            response.data.forEach(element =>element.orders.map((d) => {
+                d.restaurantID=element._id;
+                orderList.push(d);
+            }));
+        }
             this.setState({
-                orders: response.data,
-                filteredorders:response.data,
+                orders: orderList,
+                filteredorders:orderList,
                 orderStatusEdited:"",
                 deliveryMode:"",
                 status:"",
@@ -55,7 +63,7 @@ class CustomerOrders extends Component {
     }
 
 
-    cancelOrder = (idOrders) => {
+    cancelOrder = (idOrders,idRestaurants) => {
       
         var headers = new Headers();
         //prevent page from refresh
@@ -63,6 +71,7 @@ class CustomerOrders extends Component {
         const data = {
             orderstatus: "cancelled",
             idOrders: idOrders,
+            idRestaurants:idRestaurants
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
@@ -74,13 +83,21 @@ class CustomerOrders extends Component {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     window.alert("Order Status Updated");
-                    var data1 = { params: { idCustomers: +localStorage.getItem("c_id") } };
+                    var data1 = { params: { idCustomers: localStorage.getItem("c_id") } };
                     axios.get("http://localhost:3001/getCustomerOrders", data1).then((response) => {
                         //update the state with the response data
                         console.log(response.data);
+                        const orderList = [];
+                        if(response.data!==""&&response.data!==undefined)
+                        {
+                            response.data.forEach(element =>element.orders.map((d) => {
+                            d.restaurantID=element._id;
+                            orderList.push(d);
+                        }));
+                    }
                         this.setState({
-                            orders: response.data,
-                            filteredorders:response.data,
+                            orders: orderList,
+                            filteredorders:orderList,
                             orderStatusEdited:"",
                             deliveryMode:"",
                             status:"",
@@ -109,6 +126,7 @@ class CustomerOrders extends Component {
         console.log(e);
         console.log("filter", this.state.orders)
         if (this.state.orders !== "") {
+            this.state.orders
             filter1 = this.state.orders.filter(function (d) {
                 return d.orderStatus === e;
             });
@@ -119,16 +137,12 @@ class CustomerOrders extends Component {
         });
 
     };
-    fetchOrderDetails = (idOrders) => {
-        var data = { params: { idOrders: idOrders } };
-        axios.get("http://localhost:3001/getCustomerOrderDetails", data).then((response) => {
-            //update the state with the response data
-            console.log("OrderDetails:",response.data);
-            this.setState({
-                orderDetails: response.data,
-                orderItemListModal:true,
-            });
-        });
+    fetchOrderDetails = (orderDetails) => {
+                    this.setState({
+                        orderDetails: orderDetails.items,
+                        orderItemListModal:true,
+                    });
+                
     }
 
 
@@ -156,8 +170,8 @@ class CustomerOrders extends Component {
                 </Modal.Footer>
             </Modal>
         );
-        const data = this.state.filteredorders;
-        console.log("data:", data);
+        const orderList = this.state.filteredorders;
+        console.log("orderList:", orderList);
         return (
             <div>
                  {redirectVar}
@@ -184,26 +198,27 @@ class CustomerOrders extends Component {
                 </RadioGroup>
                 {orderItemList}
                 <CardColumns>
-                    {data !== "" ? data.map((d) => {
+                    {orderList !== "" ?orderList.map((d) => {
+                        console.log(d);
                         return (
 
                             <Card  style={{ width: '25rem' }}>
                             <Card.Header as="h5"> Delivery Mode : {d.deliveryMode}</Card.Header>
                           
                             <Card.Body>
-                                <Card.Title>  Order ID : {d.idOrders}</Card.Title>
+                                <Card.Title>  Order ID : {d._id}</Card.Title>
                                 <Card.Text>
                                     Time : {d.time}
                                 </Card.Text>
                                 <Card.Text>
                                 Restaurant ID :{d.restaurantID}
                                 </Card.Text>
-                                {d.orderStatus!=="delivered" && d.orderStatus!=="pickedup" && d.orderStatus!=="cancelled" ?<Button variant="danger" onClick={() => this.cancelOrder(d.idOrders)}>Cancel</Button>:<Button disabled>Cancel</Button>}
+                                {d.orderStatus!=="delivered" && d.orderStatus!=="pickedup" && d.orderStatus!=="cancelled" ?<Button variant="danger" onClick={() => this.cancelOrder(d._id,d.restaurantID)}>Cancel</Button>:<Button disabled>Cancel</Button>}
                             </Card.Body>
                             <Card.Footer>
                             
                             <large className="text-muted">Order Status : {d.orderStatus}</large>
-                           <Button variant="primary" onClick={() => this.fetchOrderDetails(d.idOrders)}>Order Details</Button> 
+                           <Button variant="primary" onClick={() => this.fetchOrderDetails(d)}>Order Details</Button> 
                             </Card.Footer>
                         </Card>
                         )

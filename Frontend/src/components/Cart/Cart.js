@@ -33,9 +33,10 @@ export default function Cart({ cart, setCart,restaurantID }) {
     var headers = new Headers();
     //prevent page from refresh
     const data = {
-        idCustomers: +localStorage.getItem("c_id"),
+        idCustomers: localStorage.getItem("c_id"),
         deliverymode:deliveryMode,
         finalorder:finalOrder,
+        idRestaurants:restaurantID
     };
     axios.defaults.withCredentials = true;
     axios.post("http://localhost:3001/submitOrder", data)

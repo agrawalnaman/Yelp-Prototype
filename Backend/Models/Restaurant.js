@@ -1,12 +1,32 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+
 const dishDetails = new Schema({
     Name: {type: String, required: true},
     Price: {type: String, required: true},
     Ingredients: {type: String, required: true},
     Image: {type: String},
     Category: {type: String}
+
+},
+{
+    versionKey: false
+});
+
+const orderDetails = new Schema({
+    deliveryMode:{type: String, required: true},
+    orderStatus:{type: String, required: true},
+    time:{type:String},
+    idCustomers:{type:String},
+    items:[{
+        Name: {type: String, required: true},
+        Price: {type: String, required: true},
+        Ingredients: {type: String, required: true},
+        Image: {type: String},
+        Category: {type: String},
+        quantity:{type:String}
+    }]
 },
 {
     versionKey: false
@@ -21,7 +41,8 @@ var restaurantProfile = new Schema({
     Timings: {type: String},
     deliveryMode: {type: String},
     PictureOfRestaurants:{type:String},
-    dishes:[dishDetails]
+    dishes:[dishDetails],
+    orders:[orderDetails]
 },
 {
     versionKey: false
