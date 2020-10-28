@@ -8,7 +8,7 @@ import CardColumns from 'react-bootstrap/CardColumns';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-
+import Pagination from 'react-bootstrap/Pagination';
 
 //Define a Login Component
 class Dishes extends Component {
@@ -26,9 +26,9 @@ class Dishes extends Component {
             ingredients: "",
             category: "",
             imageURL: "",
-            
-            idDishes:"",
-        
+            currentPage: 1,
+            itemsPerPage: 3,
+            idDishes: "",
         };
         this.addDishHandler = this.addDishHandler.bind(this);
         this.editDishHandler = this.editDishHandler.bind(this);
@@ -38,7 +38,8 @@ class Dishes extends Component {
         this.ingredientsChangeHandler = this.ingredientsChangeHandler.bind(this);
         this.imageUrlChangeHandler = this.imageUrlChangeHandler.bind(this);
         this.submitAddDish = this.submitAddDish.bind(this);
-        this.submitEditDish= this.submitEditDish.bind(this);
+        this.submitEditDish = this.submitEditDish.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
     addDishHandler = (e) => {
         this.setState({
@@ -82,6 +83,11 @@ class Dishes extends Component {
             imageURL: e.target.value,
         });
     };
+    handleClick = (event) => {
+        this.setState({
+            currentPage: Number(event.target.id),
+        });
+    };
     componentDidMount() {
         var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.get("http://localhost:3001/getRestaurantDishes", data).then((response) => {
@@ -95,8 +101,8 @@ class Dishes extends Component {
                 price: "",
                 ingredients: "",
                 category: "",
-                idDishes:"",
-            
+                idDishes: "",
+
             });
         });
 
@@ -115,7 +121,7 @@ class Dishes extends Component {
             ingredients: this.state.ingredients,
             category: this.state.category,
             imageURL: this.state.imageURL,
-            idDishes:this.state.idDishes,
+            idDishes: this.state.idDishes,
 
         };
         //set the with credentials to true
@@ -129,21 +135,21 @@ class Dishes extends Component {
                 if (response.status === 200) {
                     window.alert("Dish Edited Successfully");
                     var data1 = { params: { idRestaurants: localStorage.getItem("r_id") } };
-            axios.get("http://localhost:3001/getRestaurantDishes", data1).then((response) => {
-                //update the state with the response data
-                console.log(response.data);
-                this.setState({
-                    dishes: response.data.dishes,
-                    addDishModal: false,
-                    editDishModal: false,
-                    dishName: "",
-                    price: "",
-                    ingredients: "",
-                    category: "",
-                    idDishes:"",
-                
-                });
-            });
+                    axios.get("http://localhost:3001/getRestaurantDishes", data1).then((response) => {
+                        //update the state with the response data
+                        console.log(response.data);
+                        this.setState({
+                            dishes: response.data.dishes,
+                            addDishModal: false,
+                            editDishModal: false,
+                            dishName: "",
+                            price: "",
+                            ingredients: "",
+                            category: "",
+                            idDishes: "",
+
+                        });
+                    });
                 } else {
                     window.alert("Unable to edit dish!");
 
@@ -155,8 +161,8 @@ class Dishes extends Component {
             });
 
 
-            
-    
+
+
     };
 
 
@@ -184,21 +190,21 @@ class Dishes extends Component {
                 if (response.status === 200) {
                     window.alert("Dish Added To Menu!");
                     var data2 = { params: { idRestaurants: localStorage.getItem("r_id") } };
-            axios.get("http://localhost:3001/getRestaurantDishes", data2).then((response) => {
-                //update the state with the response data
-                console.log(response.data);
-                this.setState({
-                    dishes: response.data.dishes,
-                    addDishModal: false,
-                    editDishModal: false,
-                    dishName: "",
-                    price: "",
-                    ingredients: "",
-                    category: "",
-                    idDishes:"",
-                
-                });
-            });
+                    axios.get("http://localhost:3001/getRestaurantDishes", data2).then((response) => {
+                        //update the state with the response data
+                        console.log(response.data);
+                        this.setState({
+                            dishes: response.data.dishes,
+                            addDishModal: false,
+                            editDishModal: false,
+                            dishName: "",
+                            price: "",
+                            ingredients: "",
+                            category: "",
+                            idDishes: "",
+
+                        });
+                    });
 
                 } else {
                     window.alert("Unable to Add Dish");
@@ -210,8 +216,8 @@ class Dishes extends Component {
                 console.log("FAIL!!!");
             });
 
-            
-    
+
+
     };
 
     render() {
@@ -229,7 +235,7 @@ class Dishes extends Component {
                         </Form.Group>
                         <Form.Group controlId="Price">
                             <Form.Label>Price</Form.Label>
-                            <Form.Control type="number" step="0.01" placeholder="Price" onChange={this.priceChangeHandler} required/>
+                            <Form.Control type="number" step="0.01" placeholder="Price" onChange={this.priceChangeHandler} required />
                         </Form.Group>
                         <Form.Group controlId="exampleForm.ControlSelect1">
                             <Form.Label>Category</Form.Label>
@@ -252,7 +258,7 @@ class Dishes extends Component {
                         <Button variant="primary" type="submit">
                             Add
                         </Button>
-                       
+
                     </Form>
                 </Modal.Body>
 
@@ -276,7 +282,7 @@ class Dishes extends Component {
                         </Form.Group>
                         <Form.Group controlId="Price">
                             <Form.Label>Price</Form.Label>
-                            <Form.Control type="number" step="0.01" placeholder="Price" onChange={this.priceChangeHandler} defaultValue={this.state.price} required/>
+                            <Form.Control type="number" step="0.01" placeholder="Price" onChange={this.priceChangeHandler} defaultValue={this.state.price} required />
                         </Form.Group>
                         <Form.Group controlId="exampleForm.ControlSelect1">
                             <Form.Label>Category</Form.Label>
@@ -290,16 +296,16 @@ class Dishes extends Component {
                         </Form.Group>
                         <Form.Group controlId="formIngredients">
                             <Form.Label>Ingredients</Form.Label>
-                            <Form.Control type="text" placeholder="Ingredients" onChange={this.ingredientsChangeHandler} defaultValue={this.state.ingredients}/>
+                            <Form.Control type="text" placeholder="Ingredients" onChange={this.ingredientsChangeHandler} defaultValue={this.state.ingredients} />
                         </Form.Group>
                         <Form.Group controlId="formImageURL">
                             <Form.Label>Image URL</Form.Label>
-                            <Form.Control type="text" placeholder="Image URL" onChange={this.imageUrlChangeHandler} defaultValue={this.state.imageURL}/>
+                            <Form.Control type="text" placeholder="Image URL" onChange={this.imageUrlChangeHandler} defaultValue={this.state.imageURL} />
                         </Form.Group>
                         <Button variant="primary" type="submit">
                             Edit
                     </Button>
-                
+
                     </Form>
                 </Modal.Body>
 
@@ -310,38 +316,71 @@ class Dishes extends Component {
         );
         const data = this.state.dishes;
         console.log("data:", data);
+        const currentPage = this.state.currentPage;
+        const itemsPerPage = this.state.itemsPerPage;
+
+        // Logic for displaying todos
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+        var renderItems = "";
+        if (currentItems !== "") {
+            renderItems = currentItems.map((d) => {
+                return (
+
+                    <Card style={{ width: '25rem' }}>
+                        <Card.Header as="h5"> Category : {d.Category}</Card.Header>
+                        <Card.Img variant="top" src={d.Image} />
+                        <Card.Body>
+                            <Card.Title>{d.Name}</Card.Title>
+                            <Card.Text>
+                                Price : ${d.Price}
+                            </Card.Text>
+                            <Card.Text>
+                                Ingredients : {d.Ingredients}
+                            </Card.Text>
+                            <Card.Text>
+                                Dish ID : {d._id}
+                            </Card.Text>
+                        </Card.Body>
+                        <Card.Footer>
+                            <Button variant="primary" onClick={() => this.editDishHandler(d)}>Edit</Button>
+                        </Card.Footer>
+                    </Card>
+                )
+            });
+        }
+
+
+
+
+        const pageNumbers = [];
+        for (let i = 1; i <= Math.ceil(data.length / itemsPerPage); i++) {
+            pageNumbers.push(i);
+        }
+        const renderPageNumbers = pageNumbers.map(number => {
+            
+            return (
+                
+                <Pagination.Item key={number}
+                    id={number}
+                    onClick={this.handleClick}  active={number === this.state.currentPage} >{number}</Pagination.Item>
+            );
+        });
+
+
         return (
             <div>
                 <button type="button" class="btn btn-light btn-block btn btn-outline-danger" onClick={this.addDishHandler}>Add Dish</button>
                 {addDish}
                 {editDish}
                 <CardColumns>
-                    {data !== "" ? data.map((d) => {
-                        return (
-
-                            <Card style={{ width: '25rem' }}>
-                                <Card.Header as="h5"> Category : {d.Category}</Card.Header>
-                                <Card.Img variant="top" src={d.Image} />
-                                <Card.Body>
-                                    <Card.Title>{d.Name}</Card.Title>
-                                    <Card.Text>
-                                        Price : ${d.Price}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        Ingredients : {d.Ingredients}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        Dish ID : {d._id}
-                                    </Card.Text>
-                                </Card.Body>
-                                <Card.Footer>
-                                    <Button variant="primary" onClick={() => this.editDishHandler(d)}>Edit</Button>
-                                </Card.Footer>
-                            </Card>
-                        )
-                    }) : ""}
+                    {renderItems}
                 </CardColumns>
-              
+
+                <Pagination size="lg" >
+                    {renderPageNumbers}
+                </Pagination>
             </div>
         );
     }

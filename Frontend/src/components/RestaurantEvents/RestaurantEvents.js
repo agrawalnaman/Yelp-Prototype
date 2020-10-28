@@ -9,6 +9,8 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { Link } from "react-router-dom";
+import Pagination from 'react-bootstrap/Pagination';
+
 
 //Define a Login Component
 class RestaurantEvents extends Component {
@@ -20,26 +22,29 @@ class RestaurantEvents extends Component {
         this.state = {
             events: "",
             addEventModal: false,
-            name:"",
-            description:"",
-            time:"",
-            date:"",
-            location:"",
-            hashtags:"",
-            customerListModal:"",
-            customerListEventID:"",
-            customerList:[],
+            name: "",
+            description: "",
+            time: "",
+            date: "",
+            location: "",
+            hashtags: "",
+            customerListModal: "",
+            customerListEventID: "",
+            currentPage: 1,
+            itemsPerPage: 3,
+            customerList: [],
         };
         this.addEventHandler = this.addEventHandler.bind(this);
         this.nameHandler = this.nameHandler.bind(this);
-        this.customerListHandler=this.customerListHandler.bind(this);
-        this.descriptionHandler=this.descriptionHandler.bind(this);
-        this.timeHandler=this.timeHandler.bind(this);
-        this.dateHandler=this.dateHandler.bind(this);
-        this.locationHandler=this.locationHandler.bind(this);
-        this.hashtagsHandler=this.hashtagsHandler.bind(this);
+        this.customerListHandler = this.customerListHandler.bind(this);
+        this.descriptionHandler = this.descriptionHandler.bind(this);
+        this.timeHandler = this.timeHandler.bind(this);
+        this.dateHandler = this.dateHandler.bind(this);
+        this.locationHandler = this.locationHandler.bind(this);
+        this.hashtagsHandler = this.hashtagsHandler.bind(this);
         this.submitAddEvent = this.submitAddEvent.bind(this);
- 
+        this.handleClick = this.handleClick.bind(this);
+
     }
     addEventHandler = (e) => {
         this.setState({
@@ -54,14 +59,14 @@ class RestaurantEvents extends Component {
 
         });
     };
-    
+
     descriptionHandler = (e) => {
         this.setState({
             description: e.target.value,
 
         });
-    };    
-    
+    };
+
     timeHandler = (e) => {
         this.setState({
             time: e.target.value,
@@ -84,6 +89,11 @@ class RestaurantEvents extends Component {
             hashtags: e.target.value,
         });
     };
+    handleClick = (event) => {
+        this.setState({
+            currentPage: Number(event.target.id),
+        });
+    };
     componentDidMount() {
         var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.get("http://localhost:3001/getRestaurantEvents", data).then((response) => {
@@ -92,15 +102,15 @@ class RestaurantEvents extends Component {
             this.setState({
                 events: response.data,
                 addEventModal: false,
-                name:"",
-                description:"",
-                time:"",
-                date:"",
-                location:"",
-                hashtags:"",
-                customerListModal:"",
-                customerListEventID:"",
-                customerList:[],
+                name: "",
+                description: "",
+                time: "",
+                date: "",
+                location: "",
+                hashtags: "",
+                customerListModal: "",
+                customerListEventID: "",
+                customerList: [],
             });
         });
 
@@ -116,12 +126,12 @@ class RestaurantEvents extends Component {
         e.preventDefault();
         const data = {
             idRestaurants: localStorage.getItem("r_id"),
-            name:this.state.name,
-            description:this.state.description,
-            time:this.state.time,
-            date:this.state.date,
-            location:this.state.location,
-            hashtags:this.state.hashtags,
+            name: this.state.name,
+            description: this.state.description,
+            time: this.state.time,
+            date: this.state.date,
+            location: this.state.location,
+            hashtags: this.state.hashtags,
 
         };
         //set the with credentials to true
@@ -141,15 +151,15 @@ class RestaurantEvents extends Component {
                         this.setState({
                             events: response.data,
                             addEventModal: false,
-                            name:"",
-                            description:"",
-                            time:"",
-                            date:"",
-                            location:"",
-                            hashtags:"",
-                            customerListModal:"",
-                            customerListEventID:"",
-                            customerList:[],
+                            name: "",
+                            description: "",
+                            time: "",
+                            date: "",
+                            location: "",
+                            hashtags: "",
+                            customerListModal: "",
+                            customerListEventID: "",
+                            customerList: [],
                         });
                     });
                 } else {
@@ -162,19 +172,19 @@ class RestaurantEvents extends Component {
                 console.log("FAIL!!!");
             });
 
-          
+
     };
 
 
     customerListHandler = (d) => {
- 
+
 
         var data = { params: { idEvents: d._id } };
         axios.get("http://localhost:3001/getCustomerListEvent", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                customerList:response.data.customerevent,
+                customerList: response.data.customerevent,
             });
         });
         console.log(this.state.customerList);
@@ -202,11 +212,11 @@ class RestaurantEvents extends Component {
                     <Form onSubmit={this.submitAddEvent} >
                         <Form.Group controlId="formName">
                             <Form.Label>Event Name</Form.Label>
-                            <Form.Control type="text" placeholder="Name" onChange={this.nameHandler} required/>
+                            <Form.Control type="text" placeholder="Name" onChange={this.nameHandler} required />
                         </Form.Group>
                         <Form.Group controlId="Description">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control type="text" placeholder="Description" onChange={this.descriptionHandler} required/>
+                            <Form.Control type="text" placeholder="Description" onChange={this.descriptionHandler} required />
                         </Form.Group>
                         <Form.Group controlId="FormTime">
                             <Form.Label>Time</Form.Label>
@@ -214,15 +224,15 @@ class RestaurantEvents extends Component {
                         </Form.Group>
                         <Form.Group controlId="formDate">
                             <Form.Label>Date</Form.Label>
-                            <Form.Control type="date" placeholder="Date" onChange={this.dateHandler} required/>
+                            <Form.Control type="date" placeholder="Date" onChange={this.dateHandler} required />
                         </Form.Group>
                         <Form.Group controlId="formLocation">
                             <Form.Label>Location</Form.Label>
-                            <Form.Control type="text" placeholder="Location" onChange={this.locationHandler} required/>
+                            <Form.Control type="text" placeholder="Location" onChange={this.locationHandler} required />
                         </Form.Group>
                         <Form.Group controlId="formHashTag">
                             <Form.Label>Hashtags</Form.Label>
-                            <Form.Control type="text" placeholder="Hashtags" onChange={this.hashtagsHandler} required/>
+                            <Form.Control type="text" placeholder="Hashtags" onChange={this.hashtagsHandler} required />
                         </Form.Group>
                         <Button variant="primary" type="submit">
                             Add
@@ -241,16 +251,17 @@ class RestaurantEvents extends Component {
                 <Modal.Header closeButton>
                     <Modal.Title>Customer List</Modal.Title>
                 </Modal.Header>
-                {this.state.customerList !== undefined && this.state.customerList.length !== 0  ? this.state.customerList.map((d) => {
-                   
-                    return(
-                        <Link to={{ 
-                            pathname: "/CustomerProfileModular", 
-                            state: d._id, 
-                           }}>
+                {this.state.customerList !== undefined && this.state.customerList.length !== 0 ? this.state.customerList.map((d) => {
+
+                    return (
+                        <Link to={{
+                            pathname: "/CustomerProfileModular",
+                            state: d._id,
+                        }}>
                             {d.FirstName} {d.LastName}
-                           </Link>
-                    )}) :"No Registrations Yet"}
+                        </Link>
+                    )
+                }) : "No Registrations Yet"}
 
                 <Modal.Footer>
                     <Button variant="primary" onClick={() => this.setState({ customerListModal: false })}>Close</Button>
@@ -259,43 +270,73 @@ class RestaurantEvents extends Component {
         );
 
 
-      
+
         const data = this.state.events;
         console.log("data:", data);
+        const currentPage = this.state.currentPage;
+        const itemsPerPage = this.state.itemsPerPage;
+
+        // Logic for displaying todos
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+        var renderItems = "";
+        if (currentItems !== "") {
+            renderItems = currentItems.map((d) => {
+                return (
+
+                    <Card style={{ width: '25rem' }} bg={'danger'} className="mb-2" text={'white'}>
+                        <Card.Header as="h5">Name : {d.EventName}</Card.Header>
+                        <Card.Body>
+                            <Card.Title>Event Id : {d._id}</Card.Title>
+                            <Card.Text>
+                                Description : {d.Description}
+                            </Card.Text>
+                            <Card.Text>
+                                Location : {d.Location}
+                            </Card.Text>
+                            <Card.Text>
+                                Hashtags : {d.Hashtags}
+                            </Card.Text>
+                        </Card.Body>
+                        <Card.Footer>
+                            Time : {d.Time} ,
+                                Date : {d.Date} ,
+                                <Button variant="primary" onClick={() => this.customerListHandler(d)}>View List Of Customers</Button>
+                        </Card.Footer>
+                    </Card>
+                )
+            });
+        }
+        const pageNumbers = [];
+        for (let i = 1; i <= Math.ceil(data.length / itemsPerPage); i++) {
+            pageNumbers.push(i);
+        }
+        const renderPageNumbers = pageNumbers.map(number => {
+
+            return (
+
+                <Pagination.Item key={number} id={number} onClick={this.handleClick} active={number === this.state.currentPage}>
+                    {number}
+                </Pagination.Item>
+            );
+        });
+
+
         return (
             <div>
-                 {redirectVar}
+                {redirectVar}
                 <button type="button" class="btn btn-light btn-block btn btn-outline-danger" onClick={this.addEventHandler}>Add Event</button>
                 {addEvent}
                 {listCustomer}
                 <CardColumns>
-                    {data !== "" ? data.map((d) => {
-                        return (
-
-                            <Card style={{ width: '25rem' }} bg={'danger'}  className="mb-2" text={'white'}>
-                                <Card.Header as="h5">Name : {d.EventName}</Card.Header>
-                                <Card.Body>
-                                    <Card.Title>Event Id : {d._id}</Card.Title>
-                                    <Card.Text>
-                                        Description : {d.Description}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        Location : {d.Location}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        Hashtags : {d.Hashtags}
-                                    </Card.Text>
-                                </Card.Body>
-                                <Card.Footer>
-                                        Time : {d.Time} , 
-                                        Date : {d.Date} ,
-                                        <Button variant="primary" onClick={() => this.customerListHandler(d)}>View List Of Customers</Button>
-                                </Card.Footer>
-                            </Card>
-                        )
-                    }) : ""}
+                    {renderItems}
                 </CardColumns>
-              
+
+                <Pagination size="lg">
+                    {renderPageNumbers}
+                </Pagination>
+
             </div>
         );
     }

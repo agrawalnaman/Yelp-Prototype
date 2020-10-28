@@ -10,7 +10,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { Link } from "react-router-dom";
 import { RadioGroup, RadioButton } from 'react-radio-buttons';
-
+import Pagination from 'react-bootstrap/Pagination';
 //Define a Login Component
 class ResturantOrders extends Component {
     //call the constructor method
@@ -25,6 +25,8 @@ class ResturantOrders extends Component {
             idOrders: "",
             deliveryMode: "",
             status: "",
+            currentPage: 1,
+            itemsPerPage: 3,
 
 
         };
@@ -32,6 +34,7 @@ class ResturantOrders extends Component {
         this.statusChangeHandler = this.statusChangeHandler.bind(this);
         this.submitStatus = this.submitStatus.bind(this);
         this.onChange=this.onChange.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
     editOrderStatusHandler = (d) => {
@@ -47,6 +50,12 @@ class ResturantOrders extends Component {
     statusChangeHandler = (e) => {
         this.setState({
             status: e.target.value,
+        });
+    };
+
+    handleClick = (event) => {
+        this.setState({
+            currentPage: Number(event.target.id),
         });
     };
 
@@ -187,6 +196,56 @@ class ResturantOrders extends Component {
         );
         const data = this.state.filteredorders;
         console.log("data:", data);
+        const currentPage = this.state.currentPage;
+        const itemsPerPage = this.state.itemsPerPage;
+
+        // Logic for displaying todos
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+        var renderItems = "";
+        if (currentItems !== "") {
+            renderItems = currentItems.map((d) => {
+                return (
+
+                    <Card style={{ width: '25rem' }}>
+                        <Card.Header as="h5"> Category : {d.deliveryMode}</Card.Header>
+                        <Card.Body>
+                            <Card.Title>  Order ID : {d._id}</Card.Title>
+                            <Card.Text>
+                                Time : {d.time}
+                            </Card.Text>
+                            <Link to={{
+                                pathname: "/CustomerProfileModular",
+                                state: d.idCustomers,
+                            }}>
+                                <Card.Text>
+                                    Customer ID :{d.idCustomers}
+                                </Card.Text>
+                            </Link>
+                        </Card.Body>
+                        <Card.Footer>
+
+                            <large className="text-muted">Order Status : {d.orderStatus}</large>
+                            <Button variant="primary" onClick={() => this.editOrderStatusHandler(d)}>Update Status</Button>
+                        </Card.Footer>
+                    </Card>
+                )
+            });
+        }
+        const pageNumbers = [];
+        for (let i = 1; i <= Math.ceil(data.length / itemsPerPage); i++) {
+            pageNumbers.push(i);
+        }
+        const renderPageNumbers = pageNumbers.map(number => {
+            
+            return (
+                
+                <Pagination.Item key={number}
+                    id={number}
+                    onClick={this.handleClick}  active={number === this.state.currentPage} >{number}</Pagination.Item>
+            );
+        });
         return (
             <div>
                 {redirectVar}
@@ -204,35 +263,14 @@ class ResturantOrders extends Component {
                 </RadioGroup>
 
 
+            
                 <CardColumns>
-                    {data !== "" ? data.map((d) => {
-                        return (
-
-                            <Card style={{ width: '25rem' }}>
-                                <Card.Header as="h5"> Category : {d.deliveryMode}</Card.Header>
-                                <Card.Body>
-                                    <Card.Title>  Order ID : {d._id}</Card.Title>
-                                    <Card.Text>
-                                        Time : {d.time}
-                                    </Card.Text>
-                                    <Link to={{
-                                        pathname: "/CustomerProfileModular",
-                                        state: d.idCustomers,
-                                    }}>
-                                        <Card.Text>
-                                            Customer ID :{d.idCustomers}
-                                        </Card.Text>
-                                    </Link>
-                                </Card.Body>
-                                <Card.Footer>
-
-                                    <large className="text-muted">Order Status : {d.orderStatus}</large>
-                                    <Button variant="primary" onClick={() => this.editOrderStatusHandler(d)}>Update Status</Button>
-                                </Card.Footer>
-                            </Card>
-                        )
-                    }) : ""}
+                    {renderItems}
                 </CardColumns>
+
+                <Pagination size="lg">
+                    {renderPageNumbers}
+                </Pagination>
 
             </div>
         );

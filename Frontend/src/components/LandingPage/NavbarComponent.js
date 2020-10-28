@@ -97,8 +97,11 @@ class NavbarComponent extends Component {
             <div class="navbar-brand col-sm">
           <Link to="/CustomerEvents">
             <span class="glyphicon glyphicon-log-in"></span>Events
-            </Link>
-        </div>
+            </Link> </div>
+            <div class="navbar-brand col-sm"><Link to="/CustomerUsers">
+          <span class="glyphicon glyphicon-log-in"></span>Users
+            </Link></div>
+       
        
       </div>
     );

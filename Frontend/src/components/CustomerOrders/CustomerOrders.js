@@ -8,6 +8,7 @@ import CardColumns from 'react-bootstrap/CardColumns';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { RadioGroup, RadioButton } from 'react-radio-buttons';
+import Pagination from 'react-bootstrap/Pagination';
 
 //Define a Login Component
 class CustomerOrders extends Component {
@@ -25,12 +26,15 @@ class CustomerOrders extends Component {
             status:"",
             orderDetails:"",
             orderItemListModal:"",
+            currentPage: 1,
+            itemsPerPage: 3,
 
 
         };
         this.onChange=this.onChange.bind(this);
         this.cancelOrder=this.cancelOrder.bind(this);
         this.fetchOrderDetails=this.fetchOrderDetails.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
 
@@ -62,7 +66,11 @@ class CustomerOrders extends Component {
 
     }
 
-
+    handleClick = (event) => {
+        this.setState({
+            currentPage: Number(event.target.id),
+        });
+    };
     cancelOrder = (idOrders,idRestaurants) => {
       
         var headers = new Headers();
@@ -172,6 +180,53 @@ class CustomerOrders extends Component {
         );
         const orderList = this.state.filteredorders;
         console.log("orderList:", orderList);
+        const currentPage = this.state.currentPage;
+        const itemsPerPage = this.state.itemsPerPage;
+
+        // Logic for displaying todos
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItems = orderList.slice(indexOfFirstItem, indexOfLastItem);
+        var renderItems = "";
+        if (currentItems !== "") {
+            renderItems = currentItems.map((d) => {
+                return (
+                    <Card  style={{ width: '25rem' }}>
+                    <Card.Header as="h5"> Delivery Mode : {d.deliveryMode}</Card.Header>
+                  
+                    <Card.Body>
+                        <Card.Title>  Order ID : {d._id}</Card.Title>
+                        <Card.Text>
+                            Time : {d.time}
+                        </Card.Text>
+                        <Card.Text>
+                        Restaurant ID :{d.restaurantID}
+                        </Card.Text>
+                        {d.orderStatus!=="delivered" && d.orderStatus!=="pickedup" && d.orderStatus!=="cancelled" ?<Button variant="danger" onClick={() => this.cancelOrder(d._id,d.restaurantID)}>Cancel</Button>:<Button disabled>Cancel</Button>}
+                    </Card.Body>
+                    <Card.Footer>
+                    
+                    <large className="text-muted">Order Status : {d.orderStatus}</large>
+                   <Button variant="primary" onClick={() => this.fetchOrderDetails(d)}>Order Details</Button> 
+                    </Card.Footer>
+                </Card>
+                )
+            }) ;
+        }
+        const pageNumbers = [];
+        for (let i = 1; i <= Math.ceil(orderList.length / itemsPerPage); i++) {
+            pageNumbers.push(i);
+        }
+        const renderPageNumbers = pageNumbers.map(number => {
+            
+            return (
+                
+                <Pagination.Item key={number}
+                    id={number}
+                    onClick={this.handleClick}  active={number === this.state.currentPage} >{number}</Pagination.Item>
+            );
+        });
+
         return (
             <div>
                  {redirectVar}
@@ -198,32 +253,12 @@ class CustomerOrders extends Component {
                 </RadioGroup>
                 {orderItemList}
                 <CardColumns>
-                    {orderList !== "" ?orderList.map((d) => {
-                        console.log(d);
-                        return (
-
-                            <Card  style={{ width: '25rem' }}>
-                            <Card.Header as="h5"> Delivery Mode : {d.deliveryMode}</Card.Header>
-                          
-                            <Card.Body>
-                                <Card.Title>  Order ID : {d._id}</Card.Title>
-                                <Card.Text>
-                                    Time : {d.time}
-                                </Card.Text>
-                                <Card.Text>
-                                Restaurant ID :{d.restaurantID}
-                                </Card.Text>
-                                {d.orderStatus!=="delivered" && d.orderStatus!=="pickedup" && d.orderStatus!=="cancelled" ?<Button variant="danger" onClick={() => this.cancelOrder(d._id,d.restaurantID)}>Cancel</Button>:<Button disabled>Cancel</Button>}
-                            </Card.Body>
-                            <Card.Footer>
-                            
-                            <large className="text-muted">Order Status : {d.orderStatus}</large>
-                           <Button variant="primary" onClick={() => this.fetchOrderDetails(d)}>Order Details</Button> 
-                            </Card.Footer>
-                        </Card>
-                        )
-                    }) : ""}
+                    {renderItems}
                 </CardColumns>
+
+                <Pagination size="lg" >
+                    {renderPageNumbers}
+                </Pagination>
               
             </div>
         );
