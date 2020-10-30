@@ -664,6 +664,48 @@ app.post("/registerCustomerEvent", function (req, res) {
 
 });
 
+app.post("/followUser", function (req, res) {
+  console.log("Inside register follow user section", req.body.idCustomers,req.body.idToFollow);
+  Customers.findById(req.body.idCustomers, async function (err, result) {
+    if (err) {
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      console.log("error1");
+      res.end("Unsuccessful follow");
+    }
+    if (result) {
+      var a = result.following;
+      if (a !== undefined && a.includes(req.body.idToFollow)) {
+        res.status(205).send("Already exists");
+        console.log("error2");
+      }
+      else {
+        Customers.findByIdAndUpdate(req.body.idCustomers, { $push: { following: req.body.idToFollow } }, { useFindAndModify: false }, (error, profile) => {
+          if (error) {
+            res.writeHead(205, {
+              "Content-Type": "text/plain",
+            });
+            console.log("error3");
+            res.end();
+          }
+          if (profile) {
+            console.log("following");
+            res.writeHead(200, {
+              'Content-Type': 'text/plain'
+            })
+            res.end("user follow successful");
+          }
+
+        });
+
+      }
+    }
+  });
+
+});
+
 //Route to list of orders by customers for a restaurant
 app.get("/getRestaurantOrders", function (req, res) {
   console.log("Inside Restaurant orders section");
@@ -770,6 +812,25 @@ app.get("/getRegisteredEvents", function (req, res) {
   }).populate('restaurantevent', 'Name');
 
 });
+//Route to list following for customers 
+app.get("/getFollowing", function (req, res) {
+  console.log("Inside get following section", req.query.idCustomers);
+  Customers.findById(req.query.idCustomers , async function (err, result) {
+    if (err) {
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch Events");
+    }
+    else {
+      res.status(200).send(result);
+      console.log("********************", result);
+    }
+  }).populate('following');
+
+});
+
 
 
 //Route to list of search events by customers 
@@ -856,6 +917,63 @@ app.get("/getSearchRestaurants", function (req, res) {
 
 });
 
+//Route to list of search restaurants by customers 
+app.get("/getSearchUsers", function (req, res) {
+  console.log("Inside Search Users section:", req.query.searchterm, req.query.category);
+
+  switch (req.query.category) {
+    case "Location":
+      Customers.find({City:req.query.searchterm}, async function (err, result) {
+        if (err) {
+          console.log('Mongo Error:', err);
+          res.writeHead(205, {
+            "Content-Type": "text/plain",
+          });
+          res.end("Unsuccessful search users on location");
+        }
+        else {
+          res.status(200).send(result);
+          console.log("search users on location successfull");
+        }
+      });
+
+      break;
+    case "FirstName":
+      Customers.find({FirstName:req.query.searchterm}, async function (err, result) {
+        if (err) {
+          console.log('Mongo Error:', err);
+          res.writeHead(205, {
+            "Content-Type": "text/plain",
+          });
+          res.end("Unsuccessful search on firstname");
+        }
+        else {
+          res.status(200).send(result);
+          console.log("search users successfull");
+        }
+      });
+      break;
+    case "NickName":
+      Customers.find({NickName:req.query.searchterm}, async function (err, result) {
+        if (err) {
+          console.log('Mongo Error:', err);
+          res.writeHead(205, {
+            "Content-Type": "text/plain",
+          });
+          res.end("Unsuccessful search on nickname");
+        }
+        else {
+          res.status(200).send(result);
+          console.log("search pon nickname successfull",result);
+        }
+      });
+      break;
+  }
+
+
+
+});
+
 
 
 
@@ -893,6 +1011,25 @@ app.get("/getCustomerOrders", function (req, res) {
         "Content-Type": "text/plain",
       });
       res.end("Unsuccessful To fetch Events");
+    }
+    else {
+      res.status(200).send(result);
+      console.log("********************", result);
+    }
+  })
+
+});
+
+//Route to list of orders by restaurants for a customer
+app.get("/getAllUsers", function (req, res) {
+  console.log("Inside get all users section");
+  Customers.find({}, async function (err, result) {
+    if (err) {
+      console.log('Mongo Error:', err);
+      res.writeHead(205, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Unsuccessful To fetch all users");
     }
     else {
       res.status(200).send(result);

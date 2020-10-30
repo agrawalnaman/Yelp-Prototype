@@ -11,6 +11,8 @@ import Accordion from 'react-bootstrap/Accordion';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
 import { RadioGroup, RadioButton } from 'react-radio-buttons';
+import { Link } from "react-router-dom";
+import Pagination from 'react-bootstrap/Pagination';
 
 //Define a Login Component
 class CustomerUsers extends Component {
@@ -20,91 +22,146 @@ class CustomerUsers extends Component {
         super(props);
         //maintain the state required for this component
         this.state = {
-            event: "",
-            name: "",
+            users: "",
+            searchterm: "",
+            category: "",
             eventnotfound: "",
             registration:"",
+            filteredusers:"",
+            usersnotfound:"",
+            currentPage: 1,
+            itemsPerPage: 3,
         };
-        this.nameHandler = this.nameHandler.bind(this);
-        this.registerHandler = this.registerHandler.bind(this);
+        this.searchHandler = this.searchHandler.bind(this);
+        this.categoryChangeHandler = this.categoryChangeHandler.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
 
 
     componentDidMount() {
-        this.setState({
-            event: "",
-            name: "",
-            eventnotfound: "",
-            registration:"",
 
-        });
-
-    }
-    nameHandler = (e) => {
-        this.setState({
-            name: e.target.value,
-
-        });
-    };
-
-    registerHandler = (e) => {
         var headers = new Headers();
         //prevent page from refresh
-        console.log("register",e._id);
-        const data = {
-            idCustomers:localStorage.getItem("c_id"),
-            idEvents: e._id,
-         };
+      
         //set the with credentials to true
         axios.defaults.withCredentials = true;
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://localhost:3001/registerCustomerEvent", data)
+            .get("http://localhost:3001/getAllUsers")
             .then((response) => {
-                console.log("Status Code : ", response.status);
+                console.log("Status Code : ", response.data);
                 if (response.status === 200) {
                     this.setState({
-                        registration: <p>Registered</p>
+                        users: response.data,
+                        filteredusers:response.data,
+                        usersnotfound:"",
                     });
+                    console.log(this.state.users);
 
                 } else {
                     this.setState({
-                        registration: <p>Already Registered</p>
+                        users: "",
+                        filteredusers:"",
+                        usersnotfound: "No User Found!",
+
                     });
                 }
             })
-            .catch((e) => {
-                debugger;
-                console.log("FAIL!!!");
-            });
+
+
+    }
+    searchHandler = (e) => {
+        this.setState({
+            searchterm: e.target.value,
+
+        });
     };
 
+    handleClick = (event) => {
+        this.setState({
+            currentPage: Number(event.target.id),
+        });
+    };
+    onChange = (e) => {
+      
+        //set the with credentials to true
+        if(e==="following"){
+        var data = { params: { idCustomers: localStorage.getItem("c_id") } };
+        console.log("filter:", e);
+        axios.defaults.withCredentials = true;
+        //make a post request with the user data
+        // this.props.signup(data);
+        axios
+            .get("http://localhost:3001/getFollowing",data)
+            .then((response) => {
+                console.log("Status Code : ", response.data);
+                if (response.status === 200) {
+                    this.setState({
+                        filteredusers:response.data.following,
+                        usersnotfound:"",
+                    });
+                    console.log(this.state.users);
+
+                } else {
+                    this.setState({
+                        users: "",
+                        filteredusers:"",
+                        usersnotfound: "No User Found!",
+
+                    });
+                }
+            })
+        }
+        else{
+            this.setState({
+                filteredusers:this.state.users,
+               
+            });
+        }
+
+    
+
+    };
+    categoryChangeHandler = (e) => {
+        this.setState({
+            category: e.target.value,
+        });
+    };
     submitSearchEvent = (e) => {
         var headers = new Headers();
         //prevent page from refresh
         e.preventDefault();
-        const data = { params: { name: this.state.name } };
-        console.log("name of event:", this.state.name);
+        const data = {
+            params: {
+                searchterm: this.state.searchterm,
+                category: this.state.category,
+
+            }
+        };
+        console.log("search term:", this.state.searchterm);
         //set the with credentials to true
         axios.defaults.withCredentials = true;
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://localhost:3001/getSearchEvents", data)
+            .get("http://localhost:3001/getSearchUsers", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     this.setState({
-                        event: response.data,
+                        users: response.data,
+                        filteredusers:response.data,
                     });
-                    console.log(this.state.event);
+                    console.log(this.state.users);
 
                 } else {
                     this.setState({
-                        event: "",
-                        eventnotfound: "No Event of this Name Found!",
+                        users: "",
+                        filteredusers:"",
+                        usersnotfound: "No User Found!",
                     });
                 }
             })
@@ -115,92 +172,101 @@ class CustomerUsers extends Component {
     };
 
 
+
     render() {
-        const popover = (
-            <Popover id="popover-basic">
-              <Popover.Title as="h3">Status</Popover.Title>
-              <Popover.Content>
-              <strong>{this.state.registration}</strong> 
-              </Popover.Content>
-            </Popover>
-          );
         //redirect based on successful login
         let redirectVar = null;
         let invalidCredentials = null;
         if (!cookie.load("cookie")) {
             redirectVar = <Redirect to="/login" />;
         }
-        const data = this.state.event;
+        const data = this.state.filteredusers;
+        const currentPage = this.state.currentPage;
+        const itemsPerPage = this.state.itemsPerPage;
+
+        // Logic for displaying todos
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+        var renderItems = "";
+        if (currentItems !== "") {
+            renderItems = currentItems.map((d) => {
+                return (
+        
+                    <Card>
+                        <Card.Header>             <Link to={{
+                            pathname: "/CustomerProfileModular",
+                            state: d._id,
+                        }}>
+                            <Card.Header as="h5"> User Name : {d.FirstName} {d.LastName}</Card.Header>
+                            </Link>
+                            <Card.Header as="h5"> NickName : {d.NickName}</Card.Header>
+                        </Card.Header>
+                    </Card>
+                
+            )
+        });
+    }
+    const pageNumbers = [];
+    for (let i = 1; i <= Math.ceil(data.length / itemsPerPage); i++) {
+        pageNumbers.push(i);
+    }
+    const renderPageNumbers = pageNumbers.map(number => {
+        
+        return (
+            
+            <Pagination.Item key={number}
+                id={number}
+                onClick={this.handleClick}  active={number === this.state.currentPage} >{number}</Pagination.Item>
+        );
+    });
+
+
         return (
             <div>
                 {redirectVar}
-                
-       
-                <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
+                <div class="row">       
+                <div class ="col">
                 <Form onSubmit={this.submitSearchEvent}>
-                    <Form.Group controlId="formBasicEventName">
-                        <Form.Label>Event Name</Form.Label>
-                        <Form.Control type="text" placeholder="event name" onChange={this.nameHandler} required />
-                    </Form.Group>
-                    <Button variant="primary" type="submit" >
-                        Search Event
+                        <Form.Group controlId="formBasicEventName">
+                            <Form.Label>Input Search Term</Form.Label>
+                            <Form.Control type="text" placeholder="search term" onChange={this.searchHandler} required/>
+                        </Form.Group>
+                        <Form.Group controlId="exampleForm.ControlSelect1">
+                            <Form.Label>Search Category</Form.Label>
+                            <Form.Control as="select" onChange={this.categoryChangeHandler} defaultValue="select">
+                                <option value="Location">Location</option>
+                                <option value="NickName">NickName</option>
+                                <option value="FirstName">FirstName</option>
+                                <option value="select">Select</option>
+                            </Form.Control>
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                            Search Users
                     </Button>
-            
-                </Form>
+                    </Form>
  
                 </div>
-               
-                <RadioGroup onChange={this.onChange} horizontal >
-                    <RadioButton value="location" rootColor="#15b33d" pointColor="#0c0d0c">
-                        Location
+               <div class="col">
+                 <RadioGroup onChange={this.onChange} horizontal >
+                    <RadioButton value="none" rootColor="#15b33d" pointColor="#0c0d0c">
+                        Remove all Filters
                          </RadioButton>
-                    <RadioButton value="following" rootColor="#3380de" pointColor="#0c0d0c">
+                    <RadioButton value="following" rootColor="#3380de" pointColor="#0c0d0c" >
                         Following
                          </RadioButton>
-                </RadioGroup>
-          
-        
+                </RadioGroup> 
+                </div>
+                </div>
+
                 {this.state.eventnotfound}
-               
                 <CardColumns>
-                    {data !== "" ? data.map((d) => {
-                        return (
-                            <Accordion>
-                                <Card>
-                                    <Card.Header>
-                                    <OverlayTrigger trigger="click" placement="right" overlay={popover}>
-                                    <Button variant="primary" onClick={() => this.registerHandler(d)}>Register</Button>
-                                    </OverlayTrigger>
-                                        <Card.Header as="h5"> Event Name : {d.EventName}</Card.Header>
-                                        <Card.Header as="h5"> Restaurant : {d.restaurantevent[0].Name}</Card.Header>
-                                        <Accordion.Toggle as={Button} variant="link" eventKey="0">
-                                            Click To View Event Details
-                                    </Accordion.Toggle>
-                                    </Card.Header>
-                                    <Accordion.Collapse eventKey="0">
-                                        <Card.Body>
-                                            <Card.Title>{d.Location}</Card.Title>
-                                            <Card.Text>
-                                                Date : {d.Date}
-                                            </Card.Text>
-                                            <Card.Text>
-                                                Time : {d.Time}
-                                            </Card.Text>
-                                            <Card.Text>
-                                                Description : {d.Description}
-                                            </Card.Text>
-                                            <Card.Text>
-                                                Hashtags : {d.Hashtags}
-                                            </Card.Text>
-                                        </Card.Body>
-                                    </Accordion.Collapse>
-                                </Card>
-                            </Accordion>
-                            
-                        )
-                    }) : ""}
-                     
+                    {renderItems}
                 </CardColumns>
+
+                <Pagination size="lg" >
+                    {renderPageNumbers}
+                </Pagination>
             </div>
         );
     }

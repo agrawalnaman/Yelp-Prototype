@@ -14,7 +14,8 @@ var customerProfile = new Schema({
     State: {type: String},
     Country: {type: String},
     NickName: {type: String},
-    ProfilePicPath: {type: String}
+    ProfilePicPath: {type: String},
+    following:[{type: Schema.Types.ObjectId}],
 },
 {
     versionKey: false

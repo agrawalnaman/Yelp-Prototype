@@ -4,6 +4,8 @@ import axios from "axios";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import Card from 'react-bootstrap/Card';
+import Button from "react-bootstrap/esm/Button";
+
 class CustomerProfileModular extends Component {
 
     constructor(props) {
@@ -12,6 +14,8 @@ class CustomerProfileModular extends Component {
 
         this.state = {
             profile: "",
+            follow:false,
+            customerID:"",
         };
 
 
@@ -46,12 +50,44 @@ class CustomerProfileModular extends Component {
         
                         </Card.Body>
                 </Card>),
+                customerID:response.data._id,
 
             });
 
         });
     }
-    }
+    };
+
+    follow = () => {
+        var headers = new Headers();
+        //prevent page from refresh
+        const data = {
+            idCustomers:localStorage.getItem("c_id"),
+            idToFollow: this.state.customerID,
+         };
+        //set the with credentials to true
+        axios.defaults.withCredentials = true;
+        //make a post request with the user data
+        // this.props.signup(data);
+        axios
+            .post("http://localhost:3001/followUser", data)
+            .then((response) => {
+                console.log("Status Code : ", response.status);
+                if (response.status === 200) {
+                    this.setState({
+                        follow: true
+                    });
+
+                } else {
+                    window.alert("Already Following");
+                }
+            })
+            .catch((e) => {
+                debugger;
+                console.log("FAIL!!!");
+            });
+    };
+
 
 
     render() {
@@ -62,7 +98,10 @@ class CustomerProfileModular extends Component {
         }
         return (
             <div>
+                
                 {redirectVar}
+                {this.state.follow===false ?<Button variant="primary" onClick={() => this.follow()}>Follow</Button>:<Button disabled>Following</Button>}
+                
                 {this.state.profile}
             </div>
         );

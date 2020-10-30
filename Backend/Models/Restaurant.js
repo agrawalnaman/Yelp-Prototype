@@ -1,5 +1,6 @@
 
 const mongoose = require('mongoose');
+const customers = require('./Customer');
 const Schema = mongoose.Schema;
 
 const dishDetails = new Schema({
@@ -53,7 +54,8 @@ var restaurantProfile = new Schema({
     PictureOfRestaurants:{type:String},
     dishes:[dishDetails],
     orders:[orderDetails],
-    reviews:[reviewDetails]
+    reviews:[reviewDetails],
+    
 },
 {
     versionKey: false
