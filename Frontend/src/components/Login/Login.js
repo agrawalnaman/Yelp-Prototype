@@ -104,7 +104,7 @@ class Login extends Component {
               ),
             });
           }
-          console.log("success" + this.state.authFlag);
+          console.log("success:" + this.state.authFlag);
         })
         .catch((e) => {
           debugger;
@@ -129,6 +129,7 @@ class Login extends Component {
 
 
           } else {
+            console.log("Elseseeeee");
             this.setState({
               authFlag: false,
             });
