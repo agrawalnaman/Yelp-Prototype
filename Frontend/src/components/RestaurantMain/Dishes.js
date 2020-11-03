@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "../../App.css";
 import axios from "axios";
+import { connect } from "react-redux";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import Card from 'react-bootstrap/Card';
@@ -9,6 +10,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Pagination from 'react-bootstrap/Pagination';
+import { setDishes } from '../../redux/slices/dishes';
 
 //Define a Login Component
 class Dishes extends Component {
@@ -24,7 +26,7 @@ class Dishes extends Component {
             dishName: "",
             price: "",
             ingredients: "",
-            category: "",
+            category: "Main Course",
             imageURL: "",
             currentPage: 1,
             itemsPerPage: 3,
@@ -94,16 +96,16 @@ class Dishes extends Component {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                dishes: response.data.dishes,
+                // dishes: response.data.dishes,
                 addDishModal: false,
                 editDishModal: false,
                 dishName: "",
                 price: "",
                 ingredients: "",
-                category: "",
                 idDishes: "",
 
             });
+            this.props.setDishes(response.data.dishes)
         });
 
 
@@ -137,9 +139,9 @@ class Dishes extends Component {
                     var data1 = { params: { idRestaurants: localStorage.getItem("r_id") } };
                     axios.get("http://localhost:3001/getRestaurantDishes", data1).then((response) => {
                         //update the state with the response data
-                        console.log(response.data);
+                        console.log(response.data);                        
                         this.setState({
-                            dishes: response.data.dishes,
+                            // dishes: response.data.dishes,
                             addDishModal: false,
                             editDishModal: false,
                             dishName: "",
@@ -149,6 +151,7 @@ class Dishes extends Component {
                             idDishes: "",
 
                         });
+                        this.props.setDishes(response.data.dishes);
                     });
                 } else {
                     window.alert("Unable to edit dish!");
@@ -194,7 +197,7 @@ class Dishes extends Component {
                         //update the state with the response data
                         console.log(response.data);
                         this.setState({
-                            dishes: response.data.dishes,
+                            // dishes: response.data.dishes,
                             addDishModal: false,
                             editDishModal: false,
                             dishName: "",
@@ -204,6 +207,7 @@ class Dishes extends Component {
                             idDishes: "",
 
                         });
+                        this.props.setDishes(response.data.dishes);
                     });
 
                 } else {
@@ -286,7 +290,7 @@ class Dishes extends Component {
                         </Form.Group>
                         <Form.Group controlId="exampleForm.ControlSelect1">
                             <Form.Label>Category</Form.Label>
-                            <Form.Control as="select" onChange={this.categoryChangeHandler} defaultValue={this.state.category}>
+                            <Form.Control as="select" onChange={this.categoryChangeHandler} >
                                 <option value="Main Course">Main Course</option>
                                 <option value="Appetizer">Appetizer</option>
                                 <option value="Salads">Salads</option>
@@ -314,7 +318,7 @@ class Dishes extends Component {
                 </Modal.Footer>
             </Modal>
         );
-        const data = this.state.dishes;
+        const data = this.props.dishes;
         console.log("data:", data);
         const currentPage = this.state.currentPage;
         const itemsPerPage = this.state.itemsPerPage;
@@ -386,4 +390,9 @@ class Dishes extends Component {
     }
 }
 
-export default Dishes;
+const mapStateToProps = (state) => ({
+    dishes : state.dishesState.dishes,
+})
+const mapDispatchToProps = { setDishes }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dishes);

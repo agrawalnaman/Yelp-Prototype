@@ -11,6 +11,8 @@ import Form from 'react-bootstrap/Form';
 import { Link } from "react-router-dom";
 import { RadioGroup, RadioButton } from 'react-radio-buttons';
 import Pagination from 'react-bootstrap/Pagination';
+import { setOrders } from '../../redux/slices/orders';
+import { connect } from "react-redux";
 //Define a Login Component
 class ResturantOrders extends Component {
     //call the constructor method
@@ -65,13 +67,13 @@ class ResturantOrders extends Component {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                orders: response.data.orders,
                 filteredorders: response.data.orders,
                 orderStatusModal: false,
                 orderStatusEdited: "",
                 deliveryMode: "",
                 status: "",
             });
+            this.props.setOrders(response.data.orders);
         });
 
 
@@ -83,19 +85,19 @@ class ResturantOrders extends Component {
         //     ) : "";
         var filter1 = "";
         console.log(e);
-        console.log("filter", this.state.orders)
-        if (this.state.orders !== "" && e === "orderrecieved") {
-            filter1 = this.state.orders.filter(function (d) {
+        console.log("filter", this.props.orders)
+        if (this.props.orders !== "" && e === "orderrecieved") {
+            filter1 = this.props.orders.filter(function (d) {
                 return d.orderStatus === e;
             });
         }
-        else if (this.state.orders !== "" && e === "finished") {
-            filter1 = this.state.orders.filter(function (d) {
+        else if (this.props.orders !== "" && e === "finished") {
+            filter1 = this.props.orders.filter(function (d) {
                 return d.orderStatus === "delivered" || d.orderStatus === "pickedup";
             });
         }
-        else if (this.state.orders !== "" && e === "cancelled") {
-            filter1 = this.state.orders.filter(function (d) {
+        else if (this.props.orders !== "" && e === "cancelled") {
+            filter1 = this.props.orders.filter(function (d) {
                 return d.orderStatus === e;
             });
         }
@@ -130,13 +132,13 @@ class ResturantOrders extends Component {
                         //update the state with the response data
                         console.log(response.data);
                         this.setState({
-                            orders: response.data.orders,
                             filteredorders: response.data.orders,
                             orderStatusModal: false,
                             orderStatusEdited: "",
                             deliveryMode: "",
                             status: "",
                         });
+                        this.props.setOrders(response.data.orders);
                     });
             
 
@@ -277,4 +279,11 @@ class ResturantOrders extends Component {
     }
 }
 
-export default ResturantOrders;
+const mapStateToProps = (state) => ({
+    orders : state.ordersState.orders,
+})
+
+const mapDispatchToProps = { setOrders };
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ResturantOrders);

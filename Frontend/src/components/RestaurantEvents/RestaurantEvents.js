@@ -10,6 +10,8 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { Link } from "react-router-dom";
 import Pagination from 'react-bootstrap/Pagination';
+import { setEvents } from '../../redux/slices/events';
+import { connect } from "react-redux";
 
 
 //Define a Login Component
@@ -100,7 +102,6 @@ class RestaurantEvents extends Component {
             //update the state with the response data
             console.log(response.data);
             this.setState({
-                events: response.data,
                 addEventModal: false,
                 name: "",
                 description: "",
@@ -112,6 +113,7 @@ class RestaurantEvents extends Component {
                 customerListEventID: "",
                 customerList: [],
             });
+            this.props.setEvents(response.data);
         });
 
 
@@ -149,7 +151,6 @@ class RestaurantEvents extends Component {
                         //update the state with the response data
                         console.log(response.data);
                         this.setState({
-                            events: response.data,
                             addEventModal: false,
                             name: "",
                             description: "",
@@ -161,6 +162,7 @@ class RestaurantEvents extends Component {
                             customerListEventID: "",
                             customerList: [],
                         });
+                        this.props.setEvents(response.data);
                     });
                 } else {
                     window.alert("unable Add Event");
@@ -271,7 +273,7 @@ class RestaurantEvents extends Component {
 
 
 
-        const data = this.state.events;
+        const data = this.props.events;
         console.log("data:", data);
         const currentPage = this.state.currentPage;
         const itemsPerPage = this.state.itemsPerPage;
@@ -342,4 +344,11 @@ class RestaurantEvents extends Component {
     }
 }
 
-export default RestaurantEvents;
+const mapStateToProps = (state) => ({
+    events : state.eventsState.events,
+})
+
+const mapDispatchToProps = { setEvents };
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(RestaurantEvents);
