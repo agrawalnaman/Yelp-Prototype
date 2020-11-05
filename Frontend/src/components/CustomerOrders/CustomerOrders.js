@@ -9,6 +9,8 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { RadioGroup, RadioButton } from 'react-radio-buttons';
 import Pagination from 'react-bootstrap/Pagination';
+import { setCustomerorders } from '../../redux/slices/customerorders';
+import { connect } from "react-redux";
 
 //Define a Login Component
 class CustomerOrders extends Component {
@@ -18,7 +20,7 @@ class CustomerOrders extends Component {
         super(props);
         //maintain the state required for this component
         this.state = {
-            orders: "",
+           // orders: "",
             filteredorders:"",
             idOrders:"",
             orderStatusEdited:"",
@@ -52,7 +54,7 @@ class CustomerOrders extends Component {
             }));
         }
             this.setState({
-                orders: orderList,
+                //orders: orderList,
                 filteredorders:orderList,
                 orderStatusEdited:"",
                 deliveryMode:"",
@@ -61,6 +63,8 @@ class CustomerOrders extends Component {
                 orderItemListModal:"",
 
             });
+
+            this.props.setCustomerorders(orderList);
         });
 
 
@@ -104,7 +108,7 @@ class CustomerOrders extends Component {
                         }));
                     }
                         this.setState({
-                            orders: orderList,
+                           // orders: orderList,
                             filteredorders:orderList,
                             orderStatusEdited:"",
                             deliveryMode:"",
@@ -132,10 +136,10 @@ class CustomerOrders extends Component {
         //     ) : "";
         var filter1 = "";
         console.log(e);
-        console.log("filter", this.state.orders)
-        if (this.state.orders !== "") {
-            this.state.orders
-            filter1 = this.state.orders.filter(function (d) {
+        console.log("filter", this.props.customerorders)
+        if (this.props.customerorders !== "") {
+            this.props.customerorders
+            filter1 = this.props.customerorders.filter(function (d) {
                 return d.orderStatus === e;
             });
         }
@@ -265,4 +269,10 @@ class CustomerOrders extends Component {
     }
 }
 
-export default CustomerOrders;
+const mapStateToProps = (state) => ({
+    customerorders : state.customerordersState.customerorders,
+})
+
+const mapDispatchToProps = { setCustomerorders };
+
+export default connect(mapStateToProps, mapDispatchToProps)(CustomerOrders);

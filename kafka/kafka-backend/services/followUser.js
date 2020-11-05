@@ -11,7 +11,6 @@ function handle_request(msg, callback){
         if (result) {
           var a = result.following;
           if (a !== undefined && a.includes(msg.idToFollow)) {
-            console.log(error);
             res.status = 205;
             res.message = 'Already Exists error 2';
             callback(null, res);
@@ -19,7 +18,7 @@ function handle_request(msg, callback){
           else {
             Customers.findByIdAndUpdate(msg.idCustomers, { $push: { following: msg.idToFollow } }, { useFindAndModify: false }, (error, profile) => {
               if (error) {
-                console.log(error);
+                console.log("Follow Error ####:",error);
                 res.status = 205;
                 res.message = 'unable to follow error 3';
                 callback(null, res);

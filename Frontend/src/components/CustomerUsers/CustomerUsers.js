@@ -13,6 +13,8 @@ import Popover from 'react-bootstrap/Popover';
 import { RadioGroup, RadioButton } from 'react-radio-buttons';
 import { Link } from "react-router-dom";
 import Pagination from 'react-bootstrap/Pagination';
+import { setCustomerusers } from '../../redux/slices/customerusers';
+import { connect } from "react-redux";
 
 //Define a Login Component
 class CustomerUsers extends Component {
@@ -55,11 +57,12 @@ class CustomerUsers extends Component {
                 console.log("Status Code : ", response.data);
                 if (response.status === 200) {
                     this.setState({
-                        users: response.data,
+                        //users: response.data,
                         filteredusers:response.data,
                         usersnotfound:"",
                     });
-                    console.log(this.state.users);
+                    console.log(this.props.customerusers);
+                    this.props.setCustomerusers(response.data);
 
                 } else {
                     this.setState({
@@ -103,7 +106,7 @@ class CustomerUsers extends Component {
                         filteredusers:response.data.following,
                         usersnotfound:"",
                     });
-                    console.log(this.state.users);
+                   // console.log(this.props.customerusers);
 
                 } else {
                     this.setState({
@@ -117,7 +120,7 @@ class CustomerUsers extends Component {
         }
         else{
             this.setState({
-                filteredusers:this.state.users,
+                filteredusers:this.props.customerusers,
                
             });
         }
@@ -152,10 +155,11 @@ class CustomerUsers extends Component {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
                     this.setState({
-                        users: response.data,
+                      //  users: response.data,
                         filteredusers:response.data,
                     });
-                    console.log(this.state.users);
+                   // console.log(this.props.customerusers);
+                    this.props.setCustomerusers(response.data);
 
                 } else {
                     this.setState({
@@ -272,5 +276,11 @@ class CustomerUsers extends Component {
     }
 }
 
+const mapStateToProps = (state) => ({
+    customerusers : state.customerusersState.customerusers,
+})
 
-export default CustomerUsers;
+const mapDispatchToProps = { setCustomerusers };
+
+
+export default  connect(mapStateToProps, mapDispatchToProps)(CustomerUsers);

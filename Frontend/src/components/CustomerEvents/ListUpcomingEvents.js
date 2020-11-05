@@ -8,6 +8,8 @@ import CardColumns from 'react-bootstrap/CardColumns';
 import Button from "react-bootstrap/esm/Button";
 import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
+import { setUpcomingevents } from '../../redux/slices/upcomingevents';
+import { connect } from "react-redux";
 
 //Define a Login Component
 class ListUpcomingEvents extends Component {
@@ -40,9 +42,10 @@ class ListUpcomingEvents extends Component {
                 console.log("Status Code : ", response.data);
                 if (response.status === 200) {
                     this.setState({
-                        event: response.data,
+                       // event: response.data,
                     });
-                    console.log(this.state.event);
+                  //  console.log(this.state.event);
+                    this.props.setUpcomingevents(response.data);
 
                 } else {
                     this.setState({
@@ -62,7 +65,9 @@ class ListUpcomingEvents extends Component {
         if (!cookie.load("cookie")) {
             redirectVar = <Redirect to="/login" />;
         }
-        const data = this.state.event;
+       // const data = this.state.event;
+       const data = this.props.upcomingevents;
+       console.log("zzzzzzz",data);
         return (
             <div>
                 {redirectVar}
@@ -106,5 +111,10 @@ class ListUpcomingEvents extends Component {
     }
 }
 
+const mapStateToProps = (state) => ({
+    upcomingevents : state.upcomingeventsState.upcomingevents,
+})
 
-export default ListUpcomingEvents;
+const mapDispatchToProps = { setUpcomingevents };
+
+export default connect(mapStateToProps, mapDispatchToProps)(ListUpcomingEvents);
