@@ -4,6 +4,7 @@ const initialState = {
     username:"",
     authFlag: false,
     customerID:"",
+    persona:"",
 } ;
 const loginSlice = createSlice({
     initialState,
@@ -19,9 +20,13 @@ const loginSlice = createSlice({
             console.log("CUST ID: ", action.payload);
             state["customerID"] = action.payload
         },
+        setPersona : (state,action) => {
+            console.log("Persona: ", action.payload);
+            state["persona"] = action.payload
+        },
     }
 });
 
-export const {setUsername,setAuthFlag,setCustomerID}=loginSlice.actions;
+export const {setUsername,setAuthFlag,setCustomerID,setPersona}=loginSlice.actions;
 export default loginSlice.reducer;
 

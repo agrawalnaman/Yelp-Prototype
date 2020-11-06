@@ -4,7 +4,7 @@ import axios from "axios";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import { connect } from "react-redux";
-import { setUsername, setAuthFlag, setCustomerID } from "../../redux/slices/login";
+import { setUsername, setAuthFlag, setCustomerID,setPersona } from "../../redux/slices/login";
 import Button from 'react-bootstrap/Button';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
@@ -77,7 +77,8 @@ class Login extends Component {
           if (response.status === 200) {
 
             localStorage.setItem("c_id", response.data.idCustomers);
-            localStorage.setItem("persona", this.state.persona);                                               
+            localStorage.setItem("persona", this.state.persona);  
+            this.props.setPersona(this.state.persona);                                             
             this.setState({
               authFlag: true,
             });
@@ -90,7 +91,7 @@ class Login extends Component {
             this.props.setCustomerID(response.data.idCustomers);
             this.props.setUsername(this.state.username);
             this.props.setAuthFlag(true);
-            window.location.reload();
+          //  window.location.reload();
 
           } else {
             this.setState({
@@ -122,10 +123,14 @@ class Login extends Component {
             console.log("login r_id:", response.data.idRestaurants);
             localStorage.setItem("r_id", response.data.idRestaurants);
             localStorage.setItem("persona", this.state.persona);
+            this.props.setPersona(this.state.persona);        
             this.setState({
               authFlag: true,
             });
-            window.location.reload();
+        //    window.location.reload();
+        this.props.setCustomerID(response.data.idRestaurants);
+        this.props.setUsername(this.state.username);
+        this.props.setAuthFlag(true);
 
 
           } else {
@@ -214,7 +219,7 @@ class Login extends Component {
   }
 }
 
-const mapDispatchToProps = { setUsername, setAuthFlag, setCustomerID };
+const mapDispatchToProps = { setUsername, setAuthFlag, setCustomerID,setPersona };
 
 //export Login Component
 export default connect(null, mapDispatchToProps)(Login);

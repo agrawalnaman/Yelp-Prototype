@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import { connect } from "react-redux";
-import { setUsername, setAuthFlag, setCustomerID } from "../../redux/slices/login";
+import { setUsername, setAuthFlag, setCustomerID,setPersona } from "../../redux/slices/login";
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 
@@ -12,7 +12,7 @@ class NavbarComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      persona: localStorage.getItem("persona"),
+     persona:localStorage.getItem("persona"),
     };
     this.handleLogout = this.handleLogout.bind(this);
   }
@@ -23,10 +23,14 @@ class NavbarComponent extends Component {
     this.props.setCustomerID("");
     this.props.setUsername("");
     this.props.setAuthFlag(false);
+    this.props.setPersona(null);
     localStorage.removeItem("c_id");
     localStorage.removeItem("r_id");
     localStorage.removeItem("persona");
-    window.location.reload(false);
+    this.setState({
+      persona:null,
+  });
+   // window.location.reload(false);
 
   };
   render() {
@@ -130,8 +134,8 @@ class NavbarComponent extends Component {
           <Nav className="mr-auto">
             <Navbar.Collapse >
               <Navbar.Text>
-                {console.log(localStorage.getItem("hello", "persona"))}
-                {this.state.persona !== null ? this.state.persona === "Restaurant" ? restaurantNavbar : customerNavbar : ""}
+                {console.log("@@@@@@@@###",this.props.persona)}
+                {this.props.persona!== null || this.state.persona!== null ? this.props.persona  === "Restaurant" || this.state.persona === "Restaurant" ? restaurantNavbar : customerNavbar : ""}
               </Navbar.Text>
             </Navbar.Collapse>
           </Nav>
@@ -141,9 +145,11 @@ class NavbarComponent extends Component {
     );
   }
 }
+const mapStateToProps = (state) => ({
+  persona : state.loginState.persona,
+})
 
-
-const mapDispatchToProps = { setUsername, setAuthFlag, setCustomerID };
+const mapDispatchToProps = { setUsername, setAuthFlag, setCustomerID,setPersona };
 
 //export Navbar Component
-export default connect(null, mapDispatchToProps)(NavbarComponent);
+export default connect(mapStateToProps, mapDispatchToProps)(NavbarComponent);
