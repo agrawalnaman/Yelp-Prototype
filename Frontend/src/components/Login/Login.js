@@ -4,10 +4,13 @@ import axios from "axios";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import { connect } from "react-redux";
-import { setUsername, setAuthFlag, setCustomerID,setPersona } from "../../redux/slices/login";
+import { setUsername, setAuthFlag, setCustomerID, setPersona } from "../../redux/slices/login";
 import Button from 'react-bootstrap/Button';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
+import jwt_decode from "jwt-decode";
+
+//const jwt_decode = require('jwt-decode');
 //Define a Login Component
 class Login extends Component {
   //call the constructor method
@@ -16,12 +19,14 @@ class Login extends Component {
     super(props);
     //maintain the state required for this component
     this.state = {
+      token: "",
       username: "",
       password: "",
       authFlag: false,
       invalidCredentials: "",
       idCustomers: "",
       persona: "",
+      idRestaurants:""
 
     };
     //Bind the handlers to this class
@@ -57,7 +62,7 @@ class Login extends Component {
   };
   //submit Login handler to send a request to the node backend
   submitLogin = (e) => {
-    
+
     var headers = new Headers();
     //prevent page from refresh
     e.preventDefault();
@@ -75,23 +80,30 @@ class Login extends Component {
           console.log("Status Code : ", response.status);
           console.log(response.data);
           if (response.status === 200) {
-
-            localStorage.setItem("c_id", response.data.idCustomers);
-            localStorage.setItem("persona", this.state.persona);  
-            this.props.setPersona(this.state.persona);                                             
             this.setState({
-              authFlag: true,
+              token: response.data,
+              authFlag: true
             });
-            console.log(response.data.idCustomers);
-            this.setState({
-              idCustomers: response.data.idCustomers,
-            });
-            console.log(response.data.password);
+            console.log("length", this.state.token.length);
+            if (this.state.token.length > 0) {
+              localStorage.setItem("token", this.state.token);
 
-            this.props.setCustomerID(response.data.idCustomers);
-            this.props.setUsername(this.state.username);
-            this.props.setAuthFlag(true);
-          //  window.location.reload();
+              var decoded = jwt_decode(this.state.token.split(' ')[1]);
+              console.log("decoded:", decoded);
+              localStorage.setItem("c_id", decoded._id);
+              localStorage.setItem("persona", this.state.persona);
+              this.props.setPersona(this.state.persona);
+              // console.log(response.data.idCustomers);
+              this.setState({
+                idCustomers: decoded._id,
+              });
+              //   console.log(response.data.password);
+
+              this.props.setCustomerID(decoded._id);
+              this.props.setUsername(this.state.username);
+              this.props.setAuthFlag(true);
+              //  window.location.reload();
+            }
 
           } else {
             this.setState({
@@ -120,17 +132,28 @@ class Login extends Component {
           console.log("Status Code : ", response.status);
           console.log(response.data);
           if (response.status === 200) {
-            console.log("login r_id:", response.data.idRestaurants);
-            localStorage.setItem("r_id", response.data.idRestaurants);
-            localStorage.setItem("persona", this.state.persona);
-            this.props.setPersona(this.state.persona);        
             this.setState({
-              authFlag: true,
+              token: response.data,
+              authFlag: true
             });
-        //    window.location.reload();
-        this.props.setCustomerID(response.data.idRestaurants);
-        this.props.setUsername(this.state.username);
-        this.props.setAuthFlag(true);
+            if (this.state.token.length > 0) {
+              localStorage.setItem("token", this.state.token);
+
+              var decoded = jwt_decode(this.state.token.split(' ')[1]);
+              console.log("decoded:", decoded);
+              localStorage.setItem("r_id", decoded._id);
+            //console.log("login r_id:", response.data.idRestaurants);
+           // localStorage.setItem("r_id", response.data.idRestaurants);
+            localStorage.setItem("persona", this.state.persona);
+            this.props.setPersona(this.state.persona);
+            this.setState({
+              idRestaurants: decoded._id,
+            });
+            //    window.location.reload();
+            this.props.setCustomerID(decoded._id);
+            this.props.setUsername(this.state.username);
+            this.props.setAuthFlag(true);
+          }
 
 
           } else {
@@ -160,12 +183,12 @@ class Login extends Component {
     //redirect based on successful login
     let redirectVar = null;
     let invalidCredentials = null;
-    console.log("cookie", cookie.load("cookie"));
-    if (cookie.load("cookie") === "customer-admin") {
-      
+    console.log("local storage", localStorage.getItem("persona"));
+    if (this.state.token.length > 0 &&  localStorage.getItem("persona")==="Customer") {
+
       redirectVar = <Redirect to="/CustomerMain" />;
     }
-    else if (cookie.load("cookie") === "restaurant-admin") {
+    else if (this.state.token.length > 0 &&  localStorage.getItem("persona")==="Restaurant") {
       redirectVar = <Redirect to="/RestaurantMain" />;
     }
 
@@ -176,41 +199,41 @@ class Login extends Component {
 
           <div class="login-form">
             <form onSubmit={this.submitLogin}>
-            <ToggleButtonGroup type="radio" name="options" onChange={this.personaChangeHandler} >
-              <ToggleButton value={"Customer"}>Customer </ToggleButton>
-              <ToggleButton value={"Restaurant"}>Restaurant </ToggleButton>
-            </ToggleButtonGroup>
-            <div class="main-div">
-              <div class="panel">
+              <ToggleButtonGroup type="radio" name="options" onChange={this.personaChangeHandler} >
+                <ToggleButton value={"Customer"}>Customer </ToggleButton>
+                <ToggleButton value={"Restaurant"}>Restaurant </ToggleButton>
+              </ToggleButtonGroup>
+              <div class="main-div">
+                <div class="panel">
 
-                <h2>Login</h2>
-                <p>Please enter your username and password</p>
-              </div>
-              <div class="form-group">
-                <input
-                  onChange={this.usernameChangeHandler}
-                  type="text"
-                  class="form-control"
-                  name="username"
-                  placeholder="Username"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <input
-                  onChange={this.passwordChangeHandler}
-                  type="password"
-                  class="form-control"
-                  name="password"
-                  placeholder="Password"
-                  required
-                />
-              </div>
-              <button type="submit" class="btn btn-primary">
-                Login
+                  <h2>Login</h2>
+                  <p>Please enter your username and password</p>
+                </div>
+                <div class="form-group">
+                  <input
+                    onChange={this.usernameChangeHandler}
+                    type="text"
+                    class="form-control"
+                    name="username"
+                    placeholder="Username"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    onChange={this.passwordChangeHandler}
+                    type="password"
+                    class="form-control"
+                    name="password"
+                    placeholder="Password"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  Login
               </button>
-            </div>
-            {this.state.invalidCredentials}
+              </div>
+              {this.state.invalidCredentials}
             </form>
           </div>
         </div>
@@ -219,7 +242,7 @@ class Login extends Component {
   }
 }
 
-const mapDispatchToProps = { setUsername, setAuthFlag, setCustomerID,setPersona };
+const mapDispatchToProps = { setUsername, setAuthFlag, setCustomerID, setPersona };
 
 //export Login Component
 export default connect(null, mapDispatchToProps)(Login);

@@ -26,7 +26,7 @@ class RestaurantMain extends Component {
         //redirect based on successful login
         let redirectVar = null;
         let invalidCredentials = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             console.log("cookie not found");
             redirectVar = <Redirect to="/login" />;
         }

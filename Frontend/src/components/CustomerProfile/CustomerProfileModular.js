@@ -24,7 +24,9 @@ class CustomerProfileModular extends Component {
 
     componentDidMount() {
         var data = { params: { idCustomers: this.props.location.state} };
-        if (cookie.load("cookie")) {
+        if (localStorage.getItem("token")) {
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/customerProfile", data).then((response) => {
             //update the state with the response data
             console.log("profile did mount:", response.data);
@@ -67,6 +69,8 @@ class CustomerProfileModular extends Component {
          };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -93,7 +97,7 @@ class CustomerProfileModular extends Component {
     render() {
         //if not logged in go to login page
         let redirectVar = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/login" />;
         }
         return (

@@ -1,4 +1,5 @@
 //import the require dependencies
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -13,6 +14,13 @@ module.exports = app;
 //use cors to allow cross origin resource sharing
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
+const jwt = require('jsonwebtoken');
+const { secret } = require('./kafka/Utils/config');
+//const Users = require('../Models/UserModel');
+const { auth } = require("./kafka/Utils/passport");
+const { checkAuth } = require("./kafka/Utils/passport");
+auth();
+
 
 //Allow Access Control
 app.use(function (req, res, next) {
@@ -35,6 +43,23 @@ app.use(
     })
 );
 
+var options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    poolSize: 500,
+    bufferMaxEntries: 0
+  };
+  
+const { mongoDB } = require('./kafka/Utils/config');
+const mongoose = require('mongoose');
+mongoose.connect(mongoDB, options, (err, res) => {
+    if (err) {
+      console.log(err);
+      console.log(`MongoDB Connection Failed`);
+    } else {
+      console.log(`MongoDB Connected`);
+    }
+  });
 
 
 //Route to get All Books when user visits the Home Page
@@ -62,13 +87,14 @@ app.post("/customerLogin", function (req, res) {
             res.end("Unsuccessful Login");
         } else {
             console.log("Inside else customerLogin");
+            const payload = { _id: results.data.idCustomers};
+            const token = jwt.sign(payload, secret, {
+                expiresIn: 1008000
+            });
+            console.log("%%%%%%%%4444:",results.data.idCustomers);
             if (results.status === 200) {
-                res.cookie("cookie", "customer-admin", {
-                    maxAge: 3600000,
-                    httpOnly: false,
-                    path: "/",
-                });
-                res.status(results.status).send(results.data);
+                res.status(200).end("JWT " + token);
+                //res.status(results.status).send(results.data);
             } else {
                 res.status(results.status).send(results.message);
             }
@@ -94,13 +120,12 @@ app.post("/restaurantLogin", function (req, res) {
         } else {
             console.log("Inside else restaurantLogin");
             if (results.status === 200) {
-                res.cookie("cookie", "restaurant-admin", {
-                    maxAge: 3600000,
-                    httpOnly: false,
-                    path: "/",
+                const payload = { _id: results.data.idRestaurants};
+                const token = jwt.sign(payload, secret, {
+                    expiresIn: 1008000
                 });
                 console.log("r_id",results.data.idRestaurants);
-                res.status(results.status).send(results.data);
+                res.status(200).end("JWT " + token);
             } else {
                 res.status(results.status).send(results.message);
             }
@@ -155,7 +180,7 @@ app.post("/restaurantSignUp", function (req, res) {
 
 
 //Route to get restaurant Profile
-app.get("/restaurantProfile", function (req, res) {
+app.get("/restaurantProfile",checkAuth, function (req, res) {
     console.log("Inside Restaurant Dashboard");
     kafka.make_request('restaurantProfile', req.query, function (err, results) {
         console.log(results);
@@ -181,7 +206,7 @@ app.get("/restaurantProfile", function (req, res) {
 
 
 //Route to get Customer Profile
-app.get("/customerProfile", function (req, res) {
+app.get("/customerProfile",checkAuth, function (req, res) {
     console.log("Inside Customer profile section");
     kafka.make_request('customerProfile', req.query, function (err, results) {
         console.log(results);
@@ -205,7 +230,7 @@ app.get("/customerProfile", function (req, res) {
 });
 
 
-app.post("/restaurantAddNewDish", function (req, res) {
+app.post("/restaurantAddNewDish",checkAuth, function (req, res) {
     console.log("Inside Add new Dish Request");
     console.log("Req Body : ", req.body);
 
@@ -227,7 +252,7 @@ app.post("/restaurantAddNewDish", function (req, res) {
 
 
 // ADD events by restaurants
-app.post("/restaurantAddNewEvent", function (req, res) {
+app.post("/restaurantAddNewEvent",checkAuth, function (req, res) {
     console.log("Inside Add new event Request");
     console.log("Req Body : ", req.body);
     kafka.make_request('restaurantAddNewEvent', req.body, function (err, results) {
@@ -247,7 +272,7 @@ app.post("/restaurantAddNewEvent", function (req, res) {
 });
 
 //Update Menue Item By Customer
-app.post("/restaurantEditNewDish", function (req, res) {
+app.post("/restaurantEditNewDish",checkAuth, function (req, res) {
     console.log("Inside Update Dishes Edit section");
     kafka.make_request('restaurantEditNewDish', req.body, function (err, results) {
         console.log(results);
@@ -267,7 +292,7 @@ app.post("/restaurantEditNewDish", function (req, res) {
 
 
 //Route to update Customer Profile
-app.post("/updateCustomerProfile", function (req, res) {
+app.post("/updateCustomerProfile",checkAuth, function (req, res) {
     console.log("Inside Update customer profile section");
     console.log(req.body);
     kafka.make_request('updateCustomerProfile', req.body, function (err, results) {
@@ -287,7 +312,7 @@ app.post("/updateCustomerProfile", function (req, res) {
 });
 
 //Route to update Customer Password
-app.post("/updateCustomerPassword", function (req, res) {
+app.post("/updateCustomerPassword",checkAuth, function (req, res) {
     console.log("Inside Update customer password section");
     kafka.make_request('updateCustomerPassword', req.body, function (err, results) {
         console.log(results);
@@ -306,7 +331,7 @@ app.post("/updateCustomerPassword", function (req, res) {
 });
 
 //Route to update restaurant password .
-app.post("/updateRestaurantPassword", function (req, res) {
+app.post("/updateRestaurantPassword",checkAuth, function (req, res) {
     console.log("Inside Update restaurant password section");
     kafka.make_request('updateRestaurantPassword', req.body, function (err, results) {
         console.log(results);
@@ -326,7 +351,7 @@ app.post("/updateRestaurantPassword", function (req, res) {
 
 
 //Route to place order by customer 
-app.post("/submitOrder", function (req, res) {
+app.post("/submitOrder",checkAuth, function (req, res) {
     console.log("Inside place order by customer  section", req.body.finalorder);
     kafka.make_request('submitOrder', req.body, function (err, results) {
         console.log(results);
@@ -348,7 +373,7 @@ app.post("/submitOrder", function (req, res) {
 
 
 //Route to post customer review
-app.post("/postReview", function (req, res) {
+app.post("/postReview",checkAuth, function (req, res) {
     console.log("Inside post customer review section", req.body.restaurantID);
     kafka.make_request('postReview', req.body, function (err, results) {
         console.log(results);
@@ -369,7 +394,7 @@ app.post("/postReview", function (req, res) {
 });
 
 //Route to update Restaurant Profile
-app.post("/updateRestaurantProfile", function (req, res) {
+app.post("/updateRestaurantProfile",checkAuth, function (req, res) {
     console.log("Inside Update Restaurant profile section");
     kafka.make_request('updateRestaurantProfile', req.body, function (err, results) {
         console.log(results);
@@ -390,7 +415,7 @@ app.post("/updateRestaurantProfile", function (req, res) {
 
 
 //Route to register a customer to event
-app.post("/registerCustomerEvent", function (req, res) {
+app.post("/registerCustomerEvent",checkAuth, function (req, res) {
     console.log("Inside register customer event section", req.body.idEvents);
 
   kafka.make_request('registerCustomerEvent', req.body, function (err, results) {
@@ -410,7 +435,7 @@ app.post("/registerCustomerEvent", function (req, res) {
 
 });
 
-app.post("/followUser", function (req, res) {
+app.post("/followUser",checkAuth, function (req, res) {
     console.log("Inside register follow user section", req.body.idCustomers,req.body.idToFollow);
     kafka.make_request('followUser', req.body, function (err, results) {
         console.log(results);
@@ -429,7 +454,7 @@ app.post("/followUser", function (req, res) {
 });
 
 //Route to list of orders by customers for a restaurant
-app.get("/getRestaurantOrders", function (req, res) {
+app.get("/getRestaurantOrders",checkAuth, function (req, res) {
     console.log("Inside Restaurant orders section",req.query);
     kafka.make_request('getRestaurantOrders', req.query, function (err, results) {
         console.log(results);
@@ -453,7 +478,7 @@ app.get("/getRestaurantOrders", function (req, res) {
 
 
 //get restaurant dishes
-app.get("/getRestaurantDishes", function (req, res) {
+app.get("/getRestaurantDishes",checkAuth, function (req, res) {
     console.log("Inside Restaurant dishes get section",req.query);
     kafka.make_request('getRestaurantDishes', req.query, function (err, results) {
         console.log(results);
@@ -477,7 +502,7 @@ app.get("/getRestaurantDishes", function (req, res) {
 });
 
 //Route to list of events for a restaurant
-app.get("/getRestaurantEvents", function (req, res) {
+app.get("/getRestaurantEvents",checkAuth, function (req, res) {
     console.log("Inside Restaurant Events section",req.query);
     kafka.make_request('getRestaurantEvents', req.query, function (err, results) {
         console.log(results);
@@ -500,7 +525,7 @@ app.get("/getRestaurantEvents", function (req, res) {
 });
 
 //Route to list upcoming events for customers 
-app.get("/getUpcomingEvents", async function (req, res) {
+app.get("/getUpcomingEvents",checkAuth, async function (req, res) {
     console.log("Inside Upcoming Events section", req.query.name);
     kafka.make_request('getUpcomingEvents', req.query, function (err, results) {
         console.log(results);
@@ -523,7 +548,7 @@ app.get("/getUpcomingEvents", async function (req, res) {
 });
 
 //Route for customer list for a event for restaurants
-app.get("/getCustomerListEvent", function (req, res) {
+app.get("/getCustomerListEvent",checkAuth, function (req, res) {
     console.log("Inside Customer list events section", req.query.idEvents);
     kafka.make_request('getCustomerListEvent', req.query, function (err, results) {
         console.log(results);
@@ -547,7 +572,7 @@ app.get("/getCustomerListEvent", function (req, res) {
 
 
 //Route to list upcoming events for customers 
-app.get("/getRegisteredEvents", function (req, res) {
+app.get("/getRegisteredEvents",checkAuth, function (req, res) {
     console.log("Inside Registered Events section", req.query.idCustomers);
     kafka.make_request('getRegisteredEvents', req.query, function (err, results) {
         console.log(results);
@@ -570,7 +595,7 @@ app.get("/getRegisteredEvents", function (req, res) {
 });
 
 //Route to list following for customers 
-app.get("/getFollowing", function (req, res) {
+app.get("/getFollowing",checkAuth, function (req, res) {
     console.log("Inside get following section", req.query.idCustomers);
     kafka.make_request('getFollowing', req.query, function (err, results) {
         console.log(results);
@@ -595,7 +620,7 @@ app.get("/getFollowing", function (req, res) {
 
 
 //Route to list of search events by customers 
-app.get("/getSearchEvents", function (req, res) {
+app.get("/getSearchEvents",checkAuth, function (req, res) {
     console.log("Inside Search Events section", req.query.name);
     kafka.make_request('getSearchEvents', req.query, function (err, results) {
         console.log(results);
@@ -618,7 +643,7 @@ app.get("/getSearchEvents", function (req, res) {
 });
 
 //Route to list of search restaurants by customers 
-app.get("/getSearchRestaurants", function (req, res) {
+app.get("/getSearchRestaurants",checkAuth, function (req, res) {
     console.log("Inside Search Restaurants section:", req.query.searchterm, req.query.category);
 
         kafka.make_request('getSearchRestaurants', req.query, function (err, results) {
@@ -634,8 +659,8 @@ app.get("/getSearchRestaurants", function (req, res) {
             if (results.status === 200) {
                 res.status(results.status).send(results.data);
             } else {
-                res.status(results.status).send(results.message);
-                console.log("get search Restaurants Success");
+                res.status(205).send(results.message);
+                console.log("get search Restaurants fail");
             }
         }
     });
@@ -645,7 +670,7 @@ app.get("/getSearchRestaurants", function (req, res) {
 
 
 //Route to list of search restaurants by customers 
-app.get("/getSearchUsers", function (req, res) {
+app.get("/getSearchUsers",checkAuth, function (req, res) {
     console.log("Inside Search Users section:", req.query.searchterm, req.query.category);
     kafka.make_request('getSearchUsers', req.query, function (err, results) {
         console.log(results);
@@ -669,8 +694,9 @@ app.get("/getSearchUsers", function (req, res) {
 });
 
 
+
 //Route to list of reviews for a restaurant
-app.get("/getRestaurantReviews", function (req, res) {
+app.get("/getRestaurantReviews",checkAuth, function (req, res) {
     console.log("Inside Restaurant orders section");
     kafka.make_request('getRestaurantReviews', req.query, function (err, results) {
         console.log(results);
@@ -695,7 +721,7 @@ app.get("/getRestaurantReviews", function (req, res) {
 
 
 //Route to list of orders by restaurants for a customer
-app.get("/getCustomerOrders", function (req, res) {
+app.get("/getCustomerOrders",checkAuth, function (req, res) {
     console.log("Inside Customers orders section");
     kafka.make_request('getCustomerOrders', req.query, function (err, results) {
         console.log(results);
@@ -718,7 +744,7 @@ app.get("/getCustomerOrders", function (req, res) {
 });
 
 //Route to list of orders by restaurants for a customer
-app.get("/getAllUsers", function (req, res) {
+app.get("/getAllUsers",checkAuth, function (req, res) {
     console.log("Inside get all users section");
     kafka.make_request('getAllUsers', req.query, function (err, results) {
         console.log(results);
@@ -742,7 +768,7 @@ app.get("/getAllUsers", function (req, res) {
 
 
 //Route to update order status through restaurant
-app.post("/updateOrderStatus", function (req, res) {
+app.post("/updateOrderStatus",checkAuth, function (req, res) {
     console.log("Inside Update Order Status");
 
     kafka.make_request('updateOrderStatus', req.body, function (err, results) {

@@ -19,7 +19,7 @@ class NavbarComponent extends Component {
 
   //handle logout to destroy the cookie
   handleLogout = () => {
-    cookie.remove("cookie", { path: "/" });
+    //cookie.remove("cookie", { path: "/" });
     this.props.setCustomerID("");
     this.props.setUsername("");
     this.props.setAuthFlag(false);
@@ -27,6 +27,7 @@ class NavbarComponent extends Component {
     localStorage.removeItem("c_id");
     localStorage.removeItem("r_id");
     localStorage.removeItem("persona");
+    localStorage.removeItem("token");
     this.setState({
       persona:null,
   });
@@ -38,8 +39,8 @@ class NavbarComponent extends Component {
     //if Cookie is set render Logout Button
     let navLogin = null;
 
-    if (cookie.load("cookie")) {
-      console.log("Able to read cookie");
+    if (localStorage.getItem("token")) {
+      console.log("Able to read token");
       navLogin = (
         <ul class="nav navbar-nav navbar-right">
           <li>
@@ -51,7 +52,7 @@ class NavbarComponent extends Component {
       );
     } else {
       //Else display login button
-      console.log("Not Able to read cookie");
+      console.log("Not Able to read token");
       navLogin = (
         <ul class="nav navbar-nav navbar-right">
 
@@ -134,8 +135,9 @@ class NavbarComponent extends Component {
           <Nav className="mr-auto">
             <Navbar.Collapse >
               <Navbar.Text>
-                {console.log("@@@@@@@@###",this.props.persona)}
-                {this.props.persona!== null || this.state.persona!== null ? this.props.persona  === "Restaurant" || this.state.persona === "Restaurant" ? restaurantNavbar : customerNavbar : ""}
+                {console.log("@@@@@@@@###",this.state.persona)}
+                {console.log("$$$$$$$$",this.props.persona)}
+                {this.props.persona || this.state.persona!== null ? this.props.persona  === "Restaurant" || this.state.persona === "Restaurant" ? restaurantNavbar : customerNavbar : ""}
               </Navbar.Text>
             </Navbar.Collapse>
           </Nav>

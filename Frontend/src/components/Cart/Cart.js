@@ -39,6 +39,7 @@ export default function Cart({ cart, setCart,restaurantID }) {
         idRestaurants:restaurantID
     };
     axios.defaults.withCredentials = true;
+    axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
     axios.post("http://localhost:3001/submitOrder", data)
     .then((response) => {
         console.log("Status Code : ", response.status);

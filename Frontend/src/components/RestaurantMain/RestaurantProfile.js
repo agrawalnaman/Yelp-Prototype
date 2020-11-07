@@ -30,7 +30,9 @@ class RestaurantProfile extends Component {
     componentDidMount() {
         var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         console.log("r_id profile resturant did mount",localStorage.getItem("r_id")); 
-        if (cookie.load("cookie")) {
+        if (localStorage.getItem("token")) {
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/restaurantProfile", data).then((response) => {
             //update the state with the response data
             console.log("profile did mount:",response.data);
@@ -92,6 +94,8 @@ class RestaurantProfile extends Component {
           idRestaurants: localStorage.getItem("r_id"),
       };
       axios.defaults.withCredentials = true;
+      axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
       axios
           .post("http://localhost:3001/updateRestaurantPassword", data)
           .then((response) => {
@@ -128,6 +132,8 @@ class RestaurantProfile extends Component {
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios

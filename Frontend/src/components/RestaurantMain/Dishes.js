@@ -92,6 +92,8 @@ class Dishes extends Component {
     };
     componentDidMount() {
         var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/getRestaurantDishes", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
@@ -128,6 +130,8 @@ class Dishes extends Component {
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -184,6 +188,8 @@ class Dishes extends Component {
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios

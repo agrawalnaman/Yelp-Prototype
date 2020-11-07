@@ -29,9 +29,11 @@ class RestaurantPage extends Component {
     }
 
     componentDidMount() {
-        if (cookie.load("cookie")) {
+        if (localStorage.getItem("token")) {
+
         var data = { params: { idRestaurants: this.props.location.state } };
-       
+               axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/restaurantProfile", data).then((response) => {
             //update the state with the response data
             console.log("profile did mount:", response.data);
@@ -82,6 +84,8 @@ class RestaurantPage extends Component {
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -112,6 +116,8 @@ class RestaurantPage extends Component {
                 console.log("FAIL!!!");
             });
             var data1 = { params: { idRestaurants: this.props.location.state } };
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
             axios.get("http://localhost:3001/getRestaurantOrders", data1).then((response) => {
                 //update the state with the response data
                 console.log(response.data);
@@ -130,7 +136,7 @@ class RestaurantPage extends Component {
     render() {
         let redirectVar = null;
         let invalidCredentials = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/login" />;
         }
 

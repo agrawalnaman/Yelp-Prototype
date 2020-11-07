@@ -34,6 +34,8 @@ class ListUpcomingEvents extends Component {
         console.log("name of event:", this.state.name);
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -62,7 +64,7 @@ class ListUpcomingEvents extends Component {
         //redirect based on successful login
         let redirectVar = null;
         let invalidCredentials = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/login" />;
         }
        // const data = this.state.event;

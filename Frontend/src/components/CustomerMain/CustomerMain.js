@@ -94,6 +94,7 @@ class CustomerMain extends Component {
         console.log("search term:", this.state.searchterm);
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -126,7 +127,7 @@ class CustomerMain extends Component {
         //redirect based on successful login
         let redirectVar = null;
         let invalidCredentials = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/login" />;
         }
         const data = this.state.filteredrestaurants;

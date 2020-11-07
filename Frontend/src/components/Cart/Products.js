@@ -13,6 +13,7 @@ export default function Products({ setCart, cart,restaurantID }) {
     const fetchData = async () => {
         console.log("nmn rest ID:",restaurantID);
         var data = { params: { idRestaurants:restaurantID} };
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
       const result =await axios.get("http://localhost:3001/getRestaurantDishes", data);
         console.log("products:",result.data.dishes);
       setData(result.data.dishes);

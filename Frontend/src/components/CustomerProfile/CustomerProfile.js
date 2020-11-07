@@ -47,9 +47,11 @@ class CustomerProfile extends Component {
     }
 
     componentDidMount() {
-        if (cookie.load("cookie")) {
+        if (localStorage.getItem("token")) {
         var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         console.log("c_id profile customer did mount", localStorage.getItem("c_id"));
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/customerProfile", data).then((response) => {
             //update the state with the response data
             console.log("profile did mount:", response);
@@ -142,6 +144,8 @@ class CustomerProfile extends Component {
             idCustomers: localStorage.getItem("c_id"),
         };
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios
             .post("http://localhost:3001/updateCustomerPassword", data)
             .then((response) => {
@@ -164,6 +168,8 @@ class CustomerProfile extends Component {
     getProfile = (e) => {
 
         var data = { params: { idCustomers: localStorage.getItem("c_id") } };
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/customerProfile", data).then((response) => {
             //update the state with the response data
             console.log(response);
@@ -226,6 +232,8 @@ class CustomerProfile extends Component {
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -263,7 +271,7 @@ class CustomerProfile extends Component {
     render() {
         //if not logged in go to login page
         let redirectVar = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/login" />;
         }
         return (

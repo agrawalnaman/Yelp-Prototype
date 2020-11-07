@@ -42,6 +42,8 @@ class CustomerOrders extends Component {
 
     componentDidMount() {
         var data = { params: { idCustomers: localStorage.getItem("c_id") } };
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         axios.get("http://localhost:3001/getCustomerOrders", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
@@ -87,6 +89,8 @@ class CustomerOrders extends Component {
         };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         //make a post request with the user data
         // this.props.signup(data);
         axios
@@ -96,6 +100,8 @@ class CustomerOrders extends Component {
                 if (response.status === 200) {
                     window.alert("Order Status Updated");
                     var data1 = { params: { idCustomers: localStorage.getItem("c_id") } };
+                    axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
                     axios.get("http://localhost:3001/getCustomerOrders", data1).then((response) => {
                         //update the state with the response data
                         console.log(response.data);
@@ -161,7 +167,7 @@ class CustomerOrders extends Component {
     render() {
         let redirectVar = null;
         let invalidCredentials = null;
-        if (!cookie.load("cookie")) {
+        if (!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/login" />;
         }
 
