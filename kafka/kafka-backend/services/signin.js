@@ -1,5 +1,5 @@
 var mongo = require('./mongo');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 
 function handle_request(msg, callback){

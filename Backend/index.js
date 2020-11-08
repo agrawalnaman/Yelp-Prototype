@@ -7,11 +7,11 @@ var session = require("express-session");
 var cookieParser = require("cookie-parser");
 var cors = require("cors");
 app.set("view engine", "ejs");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { response } = require("express");
 module.exports = app;
 //use cors to allow cross origin resource sharing
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: "http://34.220.156.227:3000", credentials: true }));
 
 //use express session to maintain session data
 app.use(
@@ -31,7 +31,7 @@ app.use(bodyParser.json());
 
 //Allow Access Control
 app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Origin", "http://34.220.156.227:3000");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader(
     "Access-Control-Allow-Methods",

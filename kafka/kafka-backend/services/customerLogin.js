@@ -1,5 +1,5 @@
 const Customers = require('../Models/Customer');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 function handle_request(msg, callback){
     var res={};

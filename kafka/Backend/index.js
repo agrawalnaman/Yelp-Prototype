@@ -8,11 +8,11 @@ var kafka = require('./kafka/client');
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
 app.set("view engine", "ejs");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { response } = require("express");
 module.exports = app;
 //use cors to allow cross origin resource sharing
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: 'http://34.220.156.227:3000', credentials: true }));
 app.use(bodyParser.json());
 const jwt = require('jsonwebtoken');
 const { secret } = require('./kafka/Utils/config');
@@ -29,7 +29,7 @@ const Customers = require('./kafka/Models/Customer');
 
 //Allow Access Control
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://34.220.156.227:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
