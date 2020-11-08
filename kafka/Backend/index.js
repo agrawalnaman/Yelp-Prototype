@@ -20,6 +20,11 @@ const { secret } = require('./kafka/Utils/config');
 const { auth } = require("./kafka/Utils/passport");
 const { checkAuth } = require("./kafka/Utils/passport");
 auth();
+var multer = require('multer');
+var upload = multer({dest:'../../Frontend/src/uploads'});
+const Customers = require('./kafka/Models/Customer');
+
+//var upload = multer({ storage: storage });
 
 
 //Allow Access Control
@@ -788,6 +793,32 @@ app.post("/updateOrderStatus",checkAuth, function (req, res) {
 
 });
 
+
+app.post('/single',upload.single('profile'), async (req, res) => {
+    try {
+        console.log("#### id customers:",req.body.idCustomers);
+        console.log("#### file:",req.file);
+      await  Customers.findByIdAndUpdate(req.body.idCustomers, { ProfilePicPath: req.file.path }, { useFindAndModify: false }, (error, profile) => {
+        if (error) {
+          res.writeHead(205, {
+            "Content-Type": "text/plain",
+          });
+          res.end();
+        }
+        if (profile) {
+            res.status(200).send(req.file);
+        }
+  
+      });
+ 
+    }catch(err) {
+        res.writeHead(205, {
+            "Content-Type": "text/plain",
+          });
+          console.log(err);
+          res.end();
+    }
+  });
 //start your server on port 3001
 app.listen(3001);
 console.log("Server Listening on port 3001");

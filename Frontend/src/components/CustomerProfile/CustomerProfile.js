@@ -7,6 +7,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
+import { setCustomerprofile } from '../../redux/slices/customerprofile';
+import { connect } from "react-redux";
 class CustomerProfile extends Component {
 
     constructor(props) {
@@ -27,6 +29,7 @@ class CustomerProfile extends Component {
             country: "",
             nickname: "",
             phone: "",
+            selectedFile:""
         };
 
         this.emailChangeHandler = this.emailChangeHandler.bind(this);
@@ -43,6 +46,8 @@ class CustomerProfile extends Component {
         this.submitUpdateProfile = this.submitUpdateProfile.bind(this);
         this.phoneChangeHandler = this.phoneChangeHandler.bind(this);
         this.getProfile = this.getProfile.bind(this);
+        this.profileFileUploadHandler = this.profileFileUploadHandler.bind(this);
+
 
     }
 
@@ -69,6 +74,7 @@ class CustomerProfile extends Component {
                 country: response.data.Country,
                 nickname: response.data.NickName,
             });
+            this.props.setCustomerprofile(response.data);
         });
     }
     }
@@ -169,10 +175,19 @@ class CustomerProfile extends Component {
 
         var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-
+      
         axios.get("http://localhost:3001/customerProfile", data).then((response) => {
             //update the state with the response data
-            console.log(response);
+            console.log(response.data.ProfilePicPath);
+            this.props.setCustomerprofile(response.data);
+            var imgSrc = "";
+            if(response.data.ProfilePicPath!==undefined){
+                 imgSrc= response.data.ProfilePicPath.split('/');
+                console.log(imgSrc[imgSrc.length-1]);
+                console.log('../../uploads/'+imgSrc[imgSrc.length-1]);
+            }
+        
+
             this.setState({
                 profile: (
                     <div>
@@ -184,7 +199,9 @@ class CustomerProfile extends Component {
                                      </Accordion.Toggle>
                                 </Card.Header>
                                 <Accordion.Collapse eventKey="0">
+                                
                                     <Card.Body>
+                                    <img src={response.data.ProfilePicPath!==undefined?require('../../uploads/'+imgSrc[imgSrc.length-1]):""} alt={ response.data.ProfilePicPath} width="300"/>
 
                                         <p><label >Email ID : {response.data.Email}</label></p>
                                         <p><label >First Name : {response.data.FirstName}</label></p>
@@ -209,7 +226,39 @@ class CustomerProfile extends Component {
         });
     };
 
+    profileFileUploadHandler=(e)=> {
+        this.setState({
+          selectedFile: e.target.files[0],
+        }, () => {
+          console.log(this.state.selectedFile);
+          var headers = new Headers();
+          e.preventDefault();
+          axios.defaults.withCredentials = true;
+          axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+          var bodyFormData = new FormData();
+          bodyFormData.append('idCustomers',  localStorage.getItem("c_id"));
+          bodyFormData.append('profile', this.state.selectedFile);
+          axios({
+            method: 'post',
+            url: 'http://localhost:3001/single',
+            data: bodyFormData,
+            headers: {'Content-Type': 'multipart/form-data' }
+            })
+          .then((response) => {
+              console.log("Status Code : ", response.status);
+              if (response.status === 200) {
+                window.alert("uploaded");
 
+              } else {
+                window.alert("unable to upload");
+              }
+          })
+          .catch((e) => {
+              debugger;
+              console.log("FAIL!!!");
+          });
+        });
+      }
     submitUpdateProfile = (e) => {
         var headers = new Headers();
         //prevent page from refresh
@@ -344,7 +393,7 @@ class CustomerProfile extends Component {
 
                     {this.state.profileUpdated}
 
-
+                    <input type="file" name="profile" id="profile" accept="image/*" onChange={this.profileFileUploadHandler} />
                 </div>
                 <div class="col">
                     {redirectVar}
@@ -387,4 +436,10 @@ class CustomerProfile extends Component {
 }
 
 
-export default CustomerProfile;
+const mapStateToProps = (state) => ({
+    customerprofile : state.customerprofileState.customerprofile,
+})
+
+const mapDispatchToProps = { setCustomerprofile };
+
+export default  connect(mapStateToProps, mapDispatchToProps)(CustomerProfile);

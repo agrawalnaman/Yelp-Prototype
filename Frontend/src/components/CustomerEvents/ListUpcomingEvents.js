@@ -75,7 +75,7 @@ class ListUpcomingEvents extends Component {
                 {redirectVar}
                 {this.state.eventnotfound}
                 <CardColumns>
-                    {data !== "" ? data.map((d) => {
+                    {data !== "" && data !== undefined ? data.map((d) => {
                         return (
                             <Accordion>
                                 <Card>

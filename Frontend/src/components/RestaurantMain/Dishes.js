@@ -11,7 +11,6 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Pagination from 'react-bootstrap/Pagination';
 import { setDishes } from '../../redux/slices/dishes';
-
 //Define a Login Component
 class Dishes extends Component {
     //call the constructor method
