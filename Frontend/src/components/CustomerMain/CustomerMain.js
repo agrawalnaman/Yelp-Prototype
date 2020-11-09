@@ -98,7 +98,7 @@ class CustomerMain extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://34.220.156.227:3001/getSearchRestaurants", data)
+            .get("http://localhost:3001/getSearchRestaurants", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {

@@ -12,7 +12,7 @@ const bcrypt = require('bcryptjs');
 const { response } = require("express");
 module.exports = app;
 //use cors to allow cross origin resource sharing
-app.use(cors({ origin: 'http://34.220.156.227:3000', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
 const jwt = require('jsonwebtoken');
 const { secret } = require('./kafka/Utils/config');
@@ -29,7 +29,7 @@ const Customers = require('./kafka/Models/Customer');
 
 //Allow Access Control
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://34.220.156.227:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
@@ -57,6 +57,7 @@ var options = {
   
 const { mongoDB } = require('./kafka/Utils/config');
 const mongoose = require('mongoose');
+const Messages = require("./kafka/Models/Message");
 mongoose.connect(mongoDB, options, (err, res) => {
     if (err) {
       console.log(err);
@@ -699,6 +700,43 @@ app.get("/getSearchUsers",checkAuth, function (req, res) {
 });
 
 
+//Route to post customer review
+app.post("/postMessage", function (req, res) {
+    Messages.create({ messages: req.body.message }, (error, message) => {
+      if (error) {
+        res.writeHead(205, {
+          "Content-Type": "text/plain",
+        });
+        console.log(error);
+        res.end();
+      }
+      if (message) {
+        res.writeHead(200, {
+          'Content-Type': 'text/plain'
+        })
+        console.log("message Posted");
+        res.end("message Posted");
+      }
+    });
+  });
+
+  //Route to get message
+app.get("/getMessage", function (req, res) {
+    console.log("Inside get message section");
+    Messages.find({}, async function (err, result) {
+      if (err) {
+        console.log('Mongo Error:', err);
+        res.writeHead(205, {
+          "Content-Type": "text/plain",
+        });
+        res.end("Unsuccessful To fetch messages");
+      }
+      else {
+        res.status(200).send(result);
+        console.log("Get Events Successful");
+      }
+    });
+  });
 
 //Route to list of reviews for a restaurant
 app.get("/getRestaurantReviews",checkAuth, function (req, res) {
@@ -819,6 +857,9 @@ app.post('/single',upload.single('profile'), async (req, res) => {
           res.end();
     }
   });
+
+
+  
 //start your server on port 3001
 app.listen(3001);
 console.log("Server Listening on port 3001");

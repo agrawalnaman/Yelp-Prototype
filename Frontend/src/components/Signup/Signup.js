@@ -89,7 +89,7 @@ class Signup extends Component {
     //make a post request with the user data
     // this.props.signup(data);
     axios
-      .post("http://34.220.156.227:3001/customerSignUp", data)
+      .post("http://localhost:3001/customerSignUp", data)
       .then((response) => {
         console.log("Status Code : ", response.status);
         if (response.status === 200) {
@@ -134,7 +134,7 @@ class Signup extends Component {
     //make a post request with the user data
     // this.props.signup(data);
     axios
-      .post("http://34.220.156.227:3001/restaurantSignUp", data)
+      .post("http://localhost:3001/restaurantSignUp", data)
       .then((response) => {
         console.log("Status Code : ", response.status);
         if (response.status === 200) {

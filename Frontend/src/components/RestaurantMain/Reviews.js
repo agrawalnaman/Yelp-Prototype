@@ -22,7 +22,7 @@ class Reviews extends Component {
         var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-        axios.get("http://34.220.156.227:3001/getRestaurantReviews", data).then((response) => {
+        axios.get("http://localhost:3001/getRestaurantReviews", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({

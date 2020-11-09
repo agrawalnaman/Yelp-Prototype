@@ -5,7 +5,8 @@ import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import Card from 'react-bootstrap/Card';
 import Button from "react-bootstrap/esm/Button";
-
+import { Row, Col } from "react-bootstrap";
+import Messages from "../Messages/Messages";
 class CustomerProfileModular extends Component {
 
     constructor(props) {
@@ -14,8 +15,8 @@ class CustomerProfileModular extends Component {
 
         this.state = {
             profile: "",
-            follow:false,
-            customerID:"",
+            follow: false,
+            customerID: "",
         };
 
 
@@ -23,21 +24,21 @@ class CustomerProfileModular extends Component {
     }
 
     componentDidMount() {
-        var data = { params: { idCustomers: this.props.location.state} };
+        var data = { params: { idCustomers: this.props.location.state } };
         if (localStorage.getItem("token")) {
             axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-        axios.get("http://34.220.156.227:3001/customerProfile", data).then((response) => {
-            //update the state with the response data
-            console.log("profile did mount:", response.data);
-            this.setState({
-                profile:(            <Card>
-                    <Card.Header>
-                       
-                    </Card.Header>
-            
+            axios.get("http://localhost:3001/customerProfile", data).then((response) => {
+                //update the state with the response data
+                console.log("profile did mount:", response.data);
+                this.setState({
+                    profile: (<Card>
+                        <Card.Header>
+
+                        </Card.Header>
+
                         <Card.Body>
-        
+
                             <p><label >Email ID : {response.data.Email}</label></p>
                             <p><label >First Name : {response.data.FirstName}</label></p>
                             <p><label >LastName : {response.data.LastName}</label></p>
@@ -49,24 +50,24 @@ class CustomerProfileModular extends Component {
                             <p><label >Date Of Birth : {response.data.DOB}</label></p>
                             <p><label >Phone : {response.data.Phone}</label></p>
                             <p><label >NickName : {response.data.NickName}</label></p>
-        
+
                         </Card.Body>
-                </Card>),
-                customerID:response.data._id,
+                    </Card>),
+                    customerID: response.data._id,
+
+                });
 
             });
-
-        });
-    }
+        }
     };
 
     follow = () => {
         var headers = new Headers();
         //prevent page from refresh
         const data = {
-            idCustomers:localStorage.getItem("c_id"),
+            idCustomers: localStorage.getItem("c_id"),
             idToFollow: this.state.customerID,
-         };
+        };
         //set the with credentials to true
         axios.defaults.withCredentials = true;
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
@@ -74,7 +75,7 @@ class CustomerProfileModular extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://34.220.156.227:3001/followUser", data)
+            .post("http://localhost:3001/followUser", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
@@ -102,11 +103,17 @@ class CustomerProfileModular extends Component {
         }
         return (
             <div>
-                
+
                 {redirectVar}
-                {this.state.follow===false ?<Button variant="primary" onClick={() => this.follow()}>Follow</Button>:<Button disabled>Following</Button>}
+                {this.state.follow === false ? <Button variant="primary" onClick={() => this.follow()}>Follow</Button> : <Button disabled>Following</Button>}
+
                 
-                {this.state.profile}
+                <Row>
+                    <Col>{this.state.profile}</Col>
+                    <Col><Messages/></Col>
+                </Row>
+
+
             </div>
         );
     }

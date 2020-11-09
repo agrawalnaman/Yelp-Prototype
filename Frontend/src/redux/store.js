@@ -10,6 +10,7 @@ import customerordersReducer from "../redux/slices/customerorders";
 import upcomingeventsReducer from "../redux/slices/upcomingevents";
 import customerusersReducer from "../redux/slices/customerusers";
 import customerprofileReducer from "../redux/slices/customerprofile";
+import messagesReducer from "../redux/slices/messages";
 const store = configureStore({
     reducer : {
         loginState:loginReducer,
@@ -20,7 +21,8 @@ const store = configureStore({
         customerordersState:customerordersReducer,
         upcomingeventsState:upcomingeventsReducer,
         customerusersState:customerusersReducer,
-        customerprofileState:customerprofileReducer
+        customerprofileState:customerprofileReducer,
+        messagesState:messagesReducer
     },
     devTools : true,
     middleware : [thunk]

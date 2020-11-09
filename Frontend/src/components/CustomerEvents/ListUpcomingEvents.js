@@ -10,6 +10,7 @@ import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
 import { setUpcomingevents } from '../../redux/slices/upcomingevents';
 import { connect } from "react-redux";
+var _ = require('lodash');
 
 //Define a Login Component
 class ListUpcomingEvents extends Component {
@@ -22,6 +23,7 @@ class ListUpcomingEvents extends Component {
             event: "",
             name: "",
             eventnotfound: "",
+            sort:false
         };
     }
 
@@ -39,7 +41,7 @@ class ListUpcomingEvents extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://34.220.156.227:3001/getUpcomingEvents")
+            .get("http://localhost:3001/getUpcomingEvents")
             .then((response) => {
                 console.log("Status Code : ", response.data);
                 if (response.status === 200) {
@@ -59,6 +61,12 @@ class ListUpcomingEvents extends Component {
 
     }
 
+    sortByDate = (e) => {
+        this.setState({
+            sort:!this.state.sort
+        });
+
+    };
 
     render() {
         //redirect based on successful login
@@ -68,11 +76,14 @@ class ListUpcomingEvents extends Component {
             redirectVar = <Redirect to="/login" />;
         }
        // const data = this.state.event;
-       const data = this.props.upcomingevents;
+       const data = this.state.sort ? _.orderBy(this.props.upcomingevents, ['Date'], ['desc']) : this.props.upcomingevents;
        console.log("zzzzzzz",data);
         return (
             <div>
                 {redirectVar}
+                <Button onClick={this.sortByDate}>
+                        Sort By Date
+                </Button>
                 {this.state.eventnotfound}
                 <CardColumns>
                     {data !== "" && data !== undefined ? data.map((d) => {

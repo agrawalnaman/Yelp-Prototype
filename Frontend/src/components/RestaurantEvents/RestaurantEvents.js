@@ -100,7 +100,7 @@ class RestaurantEvents extends Component {
         var data = { params: { idRestaurants: localStorage.getItem("r_id") } };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-        axios.get("http://34.220.156.227:3001/getRestaurantEvents", data).then((response) => {
+        axios.get("http://localhost:3001/getRestaurantEvents", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
@@ -145,7 +145,7 @@ class RestaurantEvents extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://34.220.156.227:3001/restaurantAddNewEvent", data)
+            .post("http://localhost:3001/restaurantAddNewEvent", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
@@ -153,7 +153,7 @@ class RestaurantEvents extends Component {
                     var data1 = { params: { idRestaurants: localStorage.getItem("r_id") } };
                     axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-                    axios.get("http://34.220.156.227:3001/getRestaurantEvents", data1).then((response) => {
+                    axios.get("http://localhost:3001/getRestaurantEvents", data1).then((response) => {
                         //update the state with the response data
                         console.log(response.data);
                         this.setState({
@@ -190,7 +190,7 @@ class RestaurantEvents extends Component {
         var data = { params: { idEvents: d._id } };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-        axios.get("http://34.220.156.227:3001/getCustomerListEvent", data).then((response) => {
+        axios.get("http://localhost:3001/getCustomerListEvent", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             this.setState({
