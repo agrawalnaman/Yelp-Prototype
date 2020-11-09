@@ -58,7 +58,7 @@ class CustomerProfile extends Component {
         console.log("c_id profile customer did mount", localStorage.getItem("c_id"));
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-        axios.get("http://localhost:3001/customerProfile", data).then((response) => {
+        axios.get("http://34.220.156.227:3001/customerProfile", data).then((response) => {
             //update the state with the response data
             console.log("profile did mount:", response);
             this.setState({
@@ -154,7 +154,7 @@ class CustomerProfile extends Component {
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
         axios
-            .post("http://localhost:3001/updateCustomerPassword", data)
+            .post("http://34.220.156.227:3001/updateCustomerPassword", data)
             .then((response) => {
                 console.log("Status Code : ", response);
                 if (response.status === 200) {
@@ -177,7 +177,7 @@ class CustomerProfile extends Component {
         var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
       
-        axios.get("http://localhost:3001/customerProfile", data).then((response) => {
+        axios.get("http://34.220.156.227:3001/customerProfile", data).then((response) => {
             //update the state with the response data
             console.log(response.data.ProfilePicPath);
             this.props.setCustomerprofile(response.data);
@@ -241,7 +241,7 @@ class CustomerProfile extends Component {
           bodyFormData.append('profile', this.state.selectedFile);
           axios({
             method: 'post',
-            url: 'http://localhost:3001/single',
+            url: 'http://34.220.156.227:3001/single',
             data: bodyFormData,
             headers: {'Content-Type': 'multipart/form-data' }
             })
@@ -287,7 +287,7 @@ class CustomerProfile extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://localhost:3001/updateCustomerProfile", data)
+            .post("http://34.220.156.227:3001/updateCustomerProfile", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {

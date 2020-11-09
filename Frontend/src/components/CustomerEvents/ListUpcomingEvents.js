@@ -41,7 +41,7 @@ class ListUpcomingEvents extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://localhost:3001/getUpcomingEvents")
+            .get("http://34.220.156.227:3001/getUpcomingEvents")
             .then((response) => {
                 console.log("Status Code : ", response.data);
                 if (response.status === 200) {

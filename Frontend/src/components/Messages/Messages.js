@@ -24,7 +24,7 @@ class Messages extends Component {
     }
 
     componentDidMount() {
-        axios.get("http://localhost:3001/getMessage").then((response) => {
+        axios.get("http://34.220.156.227:3001/getMessage").then((response) => {
             //update the state with the response data
             console.log("profile did mount11111:", response.data);
             this.props.setMessages(response.data);
@@ -43,7 +43,7 @@ class Messages extends Component {
             message:text
         };
         axios
-        .post("http://localhost:3001/postMessage", data)
+        .post("http://34.220.156.227:3001/postMessage", data)
         .then((response) => {
             console.log("Status Code : ", response);
             if (response.status === 200) {
