@@ -54,7 +54,7 @@ class CustomerUsers extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://34.220.156.227:3001/getAllUsers")
+            .get("http://35.163.78.149:3001/getAllUsers")
             .then((response) => {
                 console.log("Status Code : ", response.data);
                 if (response.status === 200) {
@@ -102,7 +102,7 @@ class CustomerUsers extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://34.220.156.227:3001/getFollowing",data)
+            .get("http://35.163.78.149:3001/getFollowing",data)
             .then((response) => {
                 console.log("Status Code : ", response.data);
                 if (response.status === 200) {
@@ -156,7 +156,7 @@ class CustomerUsers extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://34.220.156.227:3001/getSearchUsers", data)
+            .get("http://35.163.78.149:3001/getSearchUsers", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {

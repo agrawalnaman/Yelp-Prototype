@@ -28,7 +28,7 @@ class CustomerProfileModular extends Component {
         if (localStorage.getItem("token")) {
             axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-            axios.get("http://34.220.156.227:3001/customerProfile", data).then((response) => {
+            axios.get("http://35.163.78.149:3001/customerProfile", data).then((response) => {
                 //update the state with the response data
                 console.log("profile did mount:", response.data);
                 this.setState({
@@ -75,7 +75,7 @@ class CustomerProfileModular extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://34.220.156.227:3001/followUser", data)
+            .post("http://35.163.78.149:3001/followUser", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {

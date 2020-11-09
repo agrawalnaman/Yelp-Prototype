@@ -63,7 +63,7 @@ class SearchEvents extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://34.220.156.227:3001/registerCustomerEvent", data)
+            .post("http://35.163.78.149:3001/registerCustomerEvent", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
@@ -96,7 +96,7 @@ class SearchEvents extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .get("http://34.220.156.227:3001/getSearchEvents", data)
+            .get("http://35.163.78.149:3001/getSearchEvents", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {

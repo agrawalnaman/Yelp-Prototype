@@ -14,7 +14,7 @@ export default function Products({ setCart, cart,restaurantID }) {
         console.log("nmn rest ID:",restaurantID);
         var data = { params: { idRestaurants:restaurantID} };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-      const result =await axios.get("http://34.220.156.227:3001/getRestaurantDishes", data);
+      const result =await axios.get("http://35.163.78.149:3001/getRestaurantDishes", data);
         console.log("products:",result.data.dishes);
       setData(result.data.dishes);
     };

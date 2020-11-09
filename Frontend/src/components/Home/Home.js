@@ -59,7 +59,7 @@ class Home extends Component {
     var data = {params:{idCustomers:+localStorage.getItem("c_id")}};
     axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-    axios.get("http://34.220.156.227:3001/customerProfile",data).then((response) => {
+    axios.get("http://35.163.78.149:3001/customerProfile",data).then((response) => {
    //update the state with the response data
    console.log(response);
    this.setState({
@@ -96,7 +96,7 @@ class Home extends Component {
     //make a post request with the user data
     // this.props.signup(data);
     axios
-      .post("http://34.220.156.227:3001/updateCustomerProfile", data)
+      .post("http://35.163.78.149:3001/updateCustomerProfile", data)
       .then((response) => {
         console.log("Status Code : ", response.status);
         if (response.status === 200) {
@@ -137,7 +137,7 @@ class Home extends Component {
   // UNSAFE_componentWillReceiveProps(nextProps) {
   //   if (nextProps.loginState.customerID) {
   //     var data = {params:{idCustomers:nextProps.loginState.customerID}};
-  //     axios.get("http://34.220.156.227:3001/customerProfile",data).then((response) => {
+  //     axios.get("http://35.163.78.149:3001/customerProfile",data).then((response) => {
   //       //update the state with the response data
   //       console.log(response);
   //       this.setState({

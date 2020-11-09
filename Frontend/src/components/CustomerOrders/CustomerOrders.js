@@ -44,7 +44,7 @@ class CustomerOrders extends Component {
         var data = { params: { idCustomers: localStorage.getItem("c_id") } };
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-        axios.get("http://34.220.156.227:3001/getCustomerOrders", data).then((response) => {
+        axios.get("http://35.163.78.149:3001/getCustomerOrders", data).then((response) => {
             //update the state with the response data
             console.log(response.data);
             const orderList = [];
@@ -94,7 +94,7 @@ class CustomerOrders extends Component {
         //make a post request with the user data
         // this.props.signup(data);
         axios
-            .post("http://34.220.156.227:3001/updateOrderStatus", data)
+            .post("http://35.163.78.149:3001/updateOrderStatus", data)
             .then((response) => {
                 console.log("Status Code : ", response.status);
                 if (response.status === 200) {
@@ -102,7 +102,7 @@ class CustomerOrders extends Component {
                     var data1 = { params: { idCustomers: localStorage.getItem("c_id") } };
                     axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
 
-                    axios.get("http://34.220.156.227:3001/getCustomerOrders", data1).then((response) => {
+                    axios.get("http://35.163.78.149:3001/getCustomerOrders", data1).then((response) => {
                         //update the state with the response data
                         console.log(response.data);
                         const orderList = [];
